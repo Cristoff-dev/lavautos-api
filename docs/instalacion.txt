@@ -1,0 +1,64 @@
+MANUAL DE DESARROLLO: LAVAUTOS-API
+
+1. REQUISITOS PREVIOS
+---------------------
+* Node.js (v18 o superior)
+* PostgreSQL (Servidor activo y base de datos creada)
+* Postman (Para probar los endpoints)
+
+2. CONFIGURACIÓN PASO A PASO
+----------------------------
+1. Instalar librerías: Ejecutar "npm install" en la terminal.
+
+2. MANUAL DE CONFIGURACIÓN DEL ENTORNO (.env)
+
+Para que el sistema de autenticación funcione correctamente, el archivo .env 
+debe tener exactamente este formato:
+
+--------------------------------------------------
+PORT=3000
+DATABASE_URL="postgresql://USUARIO:PASSWORD@localhost:5432/lavautos_db?schema=public"
+SECRET_KEY="lavautos_secret_key_super_segura"
+--------------------------------------------------
+
+NOTAS IMPORTANTES PARA EL EQUIPO:
+Si cambian el nombre de la llave en el .env, el sistema de Login dejará de funcionar porque no podrá firmar ni verificar los tokens.
+
+3. Sincronizar DB: Ejecutar "npx prisma db push"
+4. Generar Prisma: Ejecutar "npx prisma generate"
+5. Cargar Datos Base: Ejecutar "node prisma/seed.js" (Crea el Admin y Servicios).
+
+3. ARQUITECTURA (CÓMO TRABAJAR)
+-------------------------------
+El proyecto se divide en 5 capas para mantener el orden:
+- Route: Define la URL (ej: /users) y quién entra (ADMIN, CAJERO, etc).
+- Middleware: Valida que los datos que envía el usuario sean correctos.
+- Controller: Gestiona la petición y envía la respuesta.
+- Service: Contiene la lógica (encriptación, cálculos, reglas de negocio).
+- Model: Realiza las operaciones en la base de datos con Prisma.
+
+4. DICCIONARIO DE LA BASE DE DATOS (ENUMS)
+------------------------------------------
+Solo se aceptan estos valores exactos (en mayúsculas):
+- Roles: ADMIN, CAJERO, SUPERVISOR, LAVADOR.
+- Vehículos: SEDAN, CAMIONETA, MOTO, CAMION.
+- Estados: EN_ESPERA, EN_LAVADO, LISTO, PAGADO_Y_ENTREGADO.
+- Pagos: EFECTIVO, TRANSFERENCIA, PAGO_MOVIL, POR_DEFINIR.
+
+5. CÓMO PROBAR LA API (POSTMAN)
+-------------------------------
+1. Iniciar sesión: POST a "/api/lavautos/auth/login" con las credenciales de Admin.
+2. Obtener Token: Copia el código largo que devuelve la API.
+3. Autorizar: En las demás rutas, ve a la pestaña "Auth" -> "Bearer Token" y pega el código. Sin esto, la API dará error 401 Unauthorized.
+
+6. COMANDOS DEL DÍA A DÍA
+-------------------------
+- npm run dev : Inicia el servidor con reinicio automático.
+- npx prisma studio : Abre una interfaz web para ver los datos de las tablas.
+- npx prisma db push : Usa esto si modificas el archivo "schema.prisma".
+
+7. REGLAS GENERALES
+-------------------
+- No subir el archivo .env al repositorio.
+- Usar las respuestas de "src/shared/utils/responses.js" para todos los mensajes.
+- Siempre encriptar contraseñas en la capa Service antes de guardar en la DB.

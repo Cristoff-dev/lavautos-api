@@ -1,0 +1,47 @@
+{
+  "name": "lavautos-api",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "db:push": "npx prisma db push",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cristoff-dev/lavautos-api.git"
+  },
+  "keywords": [
+    "lavautos",
+    "api",
+    "erp",
+    "prisma",
+    "express"
+  ],
+  "author": "Cristoff-dev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cristoff-dev/lavautos-api/issues"
+  },
+  "homepage": "https://github.com/Cristoff-dev/lavautos-api#readme",
+  "description": "API REST para gestión operativa y contable de Autolavado",
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.1",
+    "puppeteer": "^24.37.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11",
+    "prisma": "^6.4.1",
+    "swagger-autogen": "^2.23.7"
+  }
+}

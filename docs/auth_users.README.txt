@@ -1,0 +1,82 @@
+DOCUMENTACIÓN TÉCNICA PARA FRONTEND: MÓDULOS AUTH & USERS
+
+1. ESPECIFICACIONES GENERALES
+--------------------------------------------------
+- Base URL: http://localhost:3000/api/lavautos
+- Content-Type: application/json
+- Seguridad: Los endpoints protegidos requieren el Header: 
+  Authorization: Bearer <TOKEN_JWT>
+
+2. MÓDULO: AUTENTICACIÓN (AUTH)
+--------------------------------------------------
+
+   POST /auth/login
+   - Descripción: Inicia sesión y obtiene el token de acceso.
+   - Body Requerido:
+     {
+       "email": "admin@lavautos.com",
+       "password": "Admin123*"
+     }
+   - Respuesta Exitosa (200 OK):
+     {
+       "success": true,
+       "code": "REQUEST_SUCCESSFUL",
+       "details": {
+         "token": "eyJhbGciOiJIUzI1...",
+         "user": {
+           "id": 1,
+           "email": "admin@lavautos.com",
+           "nombre": "Nombre Usuario",
+           "rol": "ADMIN"
+         }
+       }
+     }
+   - Errores posibles:
+     - 401: "Invalid email or password" (Credenciales incorrectas).
+     - 400: "Email and password are required" (Campos vacíos).
+
+3. MÓDULO: USUARIOS (USERS)
+--------------------------------------------------
+
+   GET /users
+   - Descripción: Lista todos los usuarios (excepto al que hace la petición).
+   - Seguridad: Solo ADMIN.
+   - Respuesta Exitosa (200 OK):
+     {
+       "success": true,
+       "details": [
+         { "id": 2, "nombre": "Pedro", "email": "p@p.com", "rol": "LAVADOR", "activo": true },
+         ...
+       ]
+     }
+
+   POST /users
+   - Descripción: Crea un nuevo empleado.
+   - Seguridad: Solo ADMIN.
+   - Body Requerido:
+     {
+       "nombre": "Juan Perez",
+       "email": "juan@lavautos.com",
+       "password": "ClaveSegura123*",
+       "rol": "CAJERO" // Valores: ADMIN, CAJERO, SUPERVISOR, LAVADOR
+     }
+   - Respuesta Exitosa (201 Created): Retorna el objeto del usuario creado (sin el password).
+   - Errores posibles:
+     - 409: "User already exists" (El email ya está registrado).
+     - 400: "Invalid format" (Error en validación de campos).
+
+4. ESTRUCTURA DE ERROR ESTÁNDAR
+--------------------------------------------------
+Cuando algo sale mal, el frontend siempre recibirá:
+{
+  "success": false,
+  "code": "ERROR_CODE",
+  "message": "Descripción amigable del error para el usuario"
+}
+
+5. TIP PARA EL FRONTEND (MANEJO DE ROLES)
+--------------------------------------------------
+El campo "rol" devuelto en el login debe usarse para persistir el estado de la aplicación y mostrar/ocultar opciones del menú:
+- ADMIN: Acceso total.
+- CAJERO: Registro de vehículos y cobros.
+- LAVADOR: Solo ver sus órdenes asignadas.
