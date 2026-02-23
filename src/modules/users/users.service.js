@@ -34,22 +34,22 @@ class ServiceUsers {
 
     async updateUser(user, currentUser) {
         try {
-            if (user.id === currentUser.id) throw new Error("You can not update yourself.");
+            // REGLAS DE ORO PARA EL ADMIN
+            if (user.id === currentUser.id) {
+                if (user.rol) throw new Error("No puedes cambiar tu propio rol.");
+                if (user.activo === false) throw new Error("No te puedes desactivar a ti mismo.");
+            }
 
             const existUser = await model.getUserById(user.id);
             if (!existUser) throw new Error('User not found.');
 
-            if (user.email) {
-                const emailCheck = await model.getUserByEmail(user.email);
-                if (emailCheck && emailCheck.id !== user.id) throw new Error('Already exist email.');
-            }
-
+            // Hash de contraseña si viene en el update
             if (user.password) {
                 user.password = await bcrypt.hash(user.password, 10);
             }
 
             const id = user.id;
-            delete user.id;
+            delete user.id; // Limpiamos el objeto antes de enviar al model
             return await model.updateUser(id, user);
         } catch (error) { throw error; }
     }

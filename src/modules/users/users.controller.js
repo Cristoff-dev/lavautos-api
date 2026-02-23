@@ -38,6 +38,11 @@ class ControllerUsers {
             const result = await service.updateUser(user, req.user);
             return response.QuerySuccess(res, result);
         } catch (error) {
+            // Manejo de errores de seguridad de auto-edición
+            if (error.message.includes("You cannot change your own role") || 
+                error.message.includes("You cannot deactivate yourself")) {
+                return response.ResConflict(res, error.message);
+            }
             return response.ErrorInternal(res, error.message);
         }
     }

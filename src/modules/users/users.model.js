@@ -22,11 +22,14 @@ class ModelUsers {
     }
 
     async deleteUser(id) {
-        try {
-            return await prisma.usuario.delete({ where: { id: id } });
-        } catch (error) { throw error; }
-    }
-
+    try {
+        // para cambiar el estado a inactivo
+        return await prisma.usuario.update({ 
+            where: { id: id },
+            data: { activo: false }
+        });
+    } catch (error) { throw error; }
+}
     async updateUser(id, object) {
         try {
             return await prisma.usuario.update({
