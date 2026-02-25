@@ -14,5 +14,5 @@ router.get('/', authorization(['ADMIN']), controller.getUsers);
 router.post('/', authorization(['ADMIN']), middlewares.addUserMiddleware, controller.addUser);
 router.delete('/:id', authorization(['ADMIN']), middlewares.deleteUserMiddleware, controller.deleteUser);
 router.patch('/:id', authorization(['ADMIN']), middlewares.updateUserMiddleware, controller.updateUser);
-
+router.patch('/restore/:id', authorization(['ADMIN']), controller.restoreUser);
 export default router;

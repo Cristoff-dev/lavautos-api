@@ -53,6 +53,15 @@ class ServiceUsers {
             return await model.updateUser(id, user);
         } catch (error) { throw error; }
     }
+    async restoreUser(id) {
+        try {
+            const user = await model.getUserById(id);
+            if (!user) throw new Error('User not found.');
+            if (user.activo) throw new Error('User is already active.');
+
+            return await model.restoreUser(id);
+        } catch (error) { throw error; }
+    }
 }
 
 export default ServiceUsers;

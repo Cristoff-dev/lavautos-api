@@ -46,6 +46,16 @@ class ControllerUsers {
             return response.ErrorInternal(res, error.message);
         }
     }
+
+    async restoreUser(req, res) {
+        try {
+            const result = await service.restoreUser(parseInt(req.params.id));
+            return response.QuerySuccess(res, result, "User restored successfully.");
+        } catch (error) {
+            if (error.message === 'User is already active.') return response.ResConflict(res, error.message);
+            return response.ErrorInternal(res, error.message);
+        }
+    }
 }
 
 export default ControllerUsers;

@@ -51,6 +51,15 @@ class ModelUsers {
             return await prisma.usuario.findUnique({ where: { id: id } });
         } catch (error) { throw error; }
     }
+    async restoreUser(id) {
+        try {
+            return await prisma.usuario.update({ 
+                where: { id: id },
+                data: { activo: true },
+                select: { id: true, nombre: true, email: true, rol: true, activo: true }
+            });
+        } catch (error) { throw error; }
+    }
 }
 
 export default ModelUsers;
