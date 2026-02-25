@@ -77,7 +77,7 @@ model Servicio {
   activo      Boolean @default(true)
 
   detalles DetalleOrden[]
-  receta   ServicioInsumo[]
+  dosificacion   ServicioInsumo[]
 }
 
 model Insumo {
