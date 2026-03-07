@@ -1,14 +1,17 @@
 import response from '../../shared/utils/responses.js';
 import ServiceUsers from './users.service.js';
+
 const service = new ServiceUsers();
 
 class ControllerUsers {
     async addUser(req, res) {
         try {
             const result = await service.addUser(req.body);
-            return response.QuerySuccess(res, result);
+            return response.QuerySuccess(res, result, "User created successfully.");
         } catch (error) {
-            if (error.message === 'Already exist email.') return response.ResConflict(res, error.message);
+            if (error.message === 'EMAIL_ALREADY_EXISTS') {
+                return response.ResConflict(res, "The email is already registered.");
+            }
             return response.ErrorInternal(res, error.message);
         }
     }
@@ -24,10 +27,11 @@ class ControllerUsers {
 
     async deleteUser(req, res) {
         try {
-            const result = await service.deleteUser(parseInt(req.params.id), req.user);
-            return response.QuerySuccess(res, "User deleted successfully.");
+            await service.deleteUser(parseInt(req.params.id), req.user);
+            return response.QuerySuccess(res, null, "User deactivated successfully.");
         } catch (error) {
-            if (error.message === 'You can not delete yourself.') return response.ResConflict(res, error.message);
+            if (error.message === 'CANNOT_DELETE_SELF') return response.ResConflict(res, "You cannot deactivate yourself.");
+            if (error.message === 'USER_NOT_FOUND') return response.ItemNotFound(res, "User not found.");
             return response.ErrorInternal(res, error.message);
         }
     }
@@ -36,13 +40,11 @@ class ControllerUsers {
         try {
             const user = { id: parseInt(req.params.id), ...req.body };
             const result = await service.updateUser(user, req.user);
-            return response.QuerySuccess(res, result);
+            return response.QuerySuccess(res, result, "User updated successfully.");
         } catch (error) {
-            // Manejo de errores de seguridad de auto-edición
-            if (error.message.includes("You cannot change your own role") || 
-                error.message.includes("You cannot deactivate yourself")) {
-                return response.ResConflict(res, error.message);
-            }
+            if (error.message === 'CANNOT_CHANGE_OWN_ROLE') return response.ResConflict(res, "You cannot change your own role.");
+            if (error.message === 'CANNOT_DEACTIVATE_SELF') return response.ResConflict(res, "You cannot deactivate yourself.");
+            if (error.message === 'USER_NOT_FOUND') return response.ItemNotFound(res, "User not found.");
             return response.ErrorInternal(res, error.message);
         }
     }
@@ -52,7 +54,8 @@ class ControllerUsers {
             const result = await service.restoreUser(parseInt(req.params.id));
             return response.QuerySuccess(res, result, "User restored successfully.");
         } catch (error) {
-            if (error.message === 'User is already active.') return response.ResConflict(res, error.message);
+            if (error.message === 'USER_ALREADY_ACTIVE') return response.ResConflict(res, "User is already active.");
+            if (error.message === 'USER_NOT_FOUND') return response.ItemNotFound(res, "User not found.");
             return response.ErrorInternal(res, error.message);
         }
     }

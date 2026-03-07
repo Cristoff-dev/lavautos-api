@@ -1,8 +1,6 @@
 import prisma from '../../shared/prisma/client.js';
 
 class ModelUsers {
-    constructor() { }
-
     async addUser(object) {
         try {
             return await prisma.usuario.create({
@@ -22,14 +20,15 @@ class ModelUsers {
     }
 
     async deleteUser(id) {
-    try {
-        // para cambiar el estado a inactivo
-        return await prisma.usuario.update({ 
-            where: { id: id },
-            data: { activo: false }
-        });
-    } catch (error) { throw error; }
-}
+        try {
+            // Soft delete: cambiar a inactivo
+            return await prisma.usuario.update({ 
+                where: { id: id },
+                data: { activo: false }
+            });
+        } catch (error) { throw error; }
+    }
+
     async updateUser(id, object) {
         try {
             return await prisma.usuario.update({
@@ -51,6 +50,7 @@ class ModelUsers {
             return await prisma.usuario.findUnique({ where: { id: id } });
         } catch (error) { throw error; }
     }
+
     async restoreUser(id) {
         try {
             return await prisma.usuario.update({ 

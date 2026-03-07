@@ -13,7 +13,7 @@ const addUserMiddleware = (req, res, next) => {
 
     if (validators.formatNamesInvalid(nombre)) errors.push('Invalid name.');
     if (validators.formatEmailInvalid(email)) errors.push('Invalid email format.');
-    if (validators.formatPasswordInvalid(password)) errors.push('Invalid password.');
+    if (validators.formatPasswordInvalid(password)) errors.push('Invalid password format.');
     if (!rolesValidos.includes(rol)) errors.push(`Invalid rol. Allowed: ${rolesValidos.join(', ')}`);
 
     if (errors.length > 0) return response.BadRequest(res, errors);
@@ -30,12 +30,15 @@ const deleteUserMiddleware = (req, res, next) => {
 
 const updateUserMiddleware = (req, res, next) => {
     const { id } = req.params;
-    const { nombre, email, rol } = req.body;
+    const { nombre, email, rol, password } = req.body;
     let errors = [];
 
     if (!id || validators.formatNumberInvalid(id)) errors.push('Invalid ID.');
     if (rol && !rolesValidos.includes(rol)) errors.push('Invalid rol.');
     if (email && validators.formatEmailInvalid(email)) errors.push('Invalid email.');
+    if (nombre && validators.formatNamesInvalid(nombre)) errors.push('Invalid name.');
+    // Validar contraseña si la están intentando actualizar
+    if (password && validators.formatPasswordInvalid(password)) errors.push('Invalid password format.');
 
     if (errors.length > 0) return response.BadRequest(res, errors);
     next();

@@ -6,14 +6,19 @@ const validateLogin = (req, res, next) => {
     let details = [];
 
     if (!email || !password) {
-        return response.BadRequest(res, 'The email and password are required.');
+        return response.BadRequest(res, 'Email and password are required fields.');
     }
 
-    if (validator.formatEmailInvalid(email)) details.push('The email format is invalid.');
-    if (validator.formatPasswordInvalid(password)) details.push('The password format is invalid.');
+    if (validator.formatEmailInvalid(email)) {
+        details.push('The email format is not valid.');
+    }
+    
+    // Aquí podrías agregar validaciones de longitud de password si fuera necesario
+    if (details.length > 0) {
+        return response.ParametersInvalid(res, details);
+    }
 
-    if (details.length > 0) return response.ParametersInvalid(res, details);
     next();
 }
 
-export default validateLogin;
+export default validateLogin; 

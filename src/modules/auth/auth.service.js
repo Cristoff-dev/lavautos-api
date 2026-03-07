@@ -1,30 +1,34 @@
 import bcrypt from 'bcrypt';
 import Token from '../../shared/utils/token.access.js';
 import AuthModel from './auth.model.js';
+
 const authModel = new AuthModel();
 
 class AuthService {
-    constructor() { }
+    async login({ email, password }) {
+        // 1. Verificar existencia del usuario
+        const user = await authModel.findByEmail(email);
+        if (!user) throw new Error('USER_NOT_FOUND');
 
-    async login(object) {
-        try {
-            // 1. Buscar usuario por email
-            const result = await authModel.findByEmail(object.email);
-            if (!result) throw new Error('User not found.');
+        // 2. Verificar si está activo (Regla de negocio)
+        if (!user.activo) throw new Error('USER_INACTIVE');
 
-            // 2. Validar si el empleado está activo en el sistema
-            if (!result.activo) throw new Error('User inactive.');
+        // 3. Validar contraseña contra el hash de la DB
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) throw new Error('INVALID_PASSWORD');
 
-            // 3. Verificar contraseña
-            const validationPassword = await bcrypt.compare(object.password, result.password);
-            if (!validationPassword) throw new Error('Password not valid.');
+        // 4. Generar el JWT
+        const token = await Token.genToken({
+            id: user.id,
+            email: user.email,
+            rol: user.rol,
+            nombre: user.nombre
+        });
 
-            // 4. Generar token y limpiar datos sensibles
-            const token = await Token.genToken(result);
-            delete result.password;
+        // 5. Seguridad: Eliminar la contraseña del objeto antes de devolverlo
+        delete user.password;
 
-            return { token: token, user: result };
-        } catch (error) { throw error; }
+        return { token, user };
     }
 }
 
