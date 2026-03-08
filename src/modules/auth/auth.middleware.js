@@ -1,19 +1,17 @@
 import response from '../../shared/utils/responses.js';
-import validator from '../../shared/utils/format.data.js';
 
 const validateLogin = (req, res, next) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
     let details = [];
 
-    if (!email || !password) {
-        return response.BadRequest(res, 'Email and password are required fields.');
+    if (!username || !password) {
+        return response.BadRequest(res, 'Username and password are required fields.');
     }
 
-    if (validator.formatEmailInvalid(email)) {
-        details.push('The email format is not valid.');
+    if (username.length < 3) {
+        details.push('Username must be at least 3 characters long.');
     }
     
-    // Aquí podrías agregar validaciones de longitud de password si fuera necesario
     if (details.length > 0) {
         return response.ParametersInvalid(res, details);
     }
@@ -21,4 +19,4 @@ const validateLogin = (req, res, next) => {
     next();
 }
 
-export default validateLogin; 
+export default validateLogin;

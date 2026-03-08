@@ -6,8 +6,9 @@ const model = new ModelUsers();
 class ServiceUsers {
     async addUser(object) {
         try {
-            const existingUser = await model.getUserByEmail(object.email);
-            if (existingUser) throw new Error('EMAIL_ALREADY_EXISTS');
+            // Validación por username
+            const existingUser = await model.getUserByUsername(object.username);
+            if (existingUser) throw new Error('USERNAME_ALREADY_EXISTS');
 
             object.password = await bcrypt.hash(object.password, 10);
             return await model.addUser(object);
@@ -33,22 +34,27 @@ class ServiceUsers {
 
     async updateUser(userData, currentUser) {
         try {
-            // REGLAS DE ORO PARA EL ADMIN
+            const existingUser = await model.getUserById(userData.id);
+            if (!existingUser) throw new Error('USER_NOT_FOUND');
+
+            // Reglas de oro para el admin propio
             if (userData.id === currentUser.id) {
                 if (userData.rol) throw new Error("CANNOT_CHANGE_OWN_ROLE");
                 if (userData.activo === false) throw new Error("CANNOT_DEACTIVATE_SELF");
             }
 
-            const existUser = await model.getUserById(userData.id);
-            if (!existUser) throw new Error('USER_NOT_FOUND');
+            // Validar si están cambiando el username y si el nuevo ya existe
+            if (userData.username && userData.username !== existingUser.username) {
+                const usernameOccupied = await model.getUserByUsername(userData.username);
+                if (usernameOccupied) throw new Error('USERNAME_ALREADY_EXISTS');
+            }
 
-            // Hash de contraseña si viene en el update
             if (userData.password) {
                 userData.password = await bcrypt.hash(userData.password, 10);
             }
 
             const idToUpdate = userData.id;
-            delete userData.id; // Limpiamos el ID del objeto para Prisma
+            delete userData.id;
             
             return await model.updateUser(idToUpdate, userData);
         } catch (error) { throw error; }

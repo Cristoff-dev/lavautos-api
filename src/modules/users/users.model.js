@@ -1,11 +1,22 @@
 import prisma from '../../shared/prisma/client.js';
 
 class ModelUsers {
+    // Select reutilizable: Quitamos email, añadimos username
+    userSelect = {
+        id: true,
+        nombre: true,
+        username: true, 
+        rol: true,
+        activo: true,
+        createdAt: true,
+        updatedAt: true
+    };
+
     async addUser(object) {
         try {
             return await prisma.usuario.create({
                 data: object,
-                select: { id: true, nombre: true, email: true, rol: true, activo: true }
+                select: this.userSelect
             });
         } catch (error) { throw error; }
     }
@@ -14,17 +25,17 @@ class ModelUsers {
         try {
             return await prisma.usuario.findMany({
                 where: { id: { not: currentUser.id } },
-                select: { id: true, nombre: true, email: true, rol: true, activo: true }
+                select: this.userSelect
             });
         } catch (error) { throw error; }
     }
 
     async deleteUser(id) {
         try {
-            // Soft delete: cambiar a inactivo
             return await prisma.usuario.update({ 
-                where: { id: id },
-                data: { activo: false }
+                where: { id },
+                data: { activo: false },
+                select: this.userSelect
             });
         } catch (error) { throw error; }
     }
@@ -32,31 +43,32 @@ class ModelUsers {
     async updateUser(id, object) {
         try {
             return await prisma.usuario.update({
-                where: { id: id },
+                where: { id },
                 data: object,
-                select: { id: true, nombre: true, email: true, rol: true, activo: true }
+                select: this.userSelect
             });
         } catch (error) { throw error; }
     }
 
-    async getUserByEmail(email) {
+    // Nuevo método: buscar por username
+    async getUserByUsername(username) {
         try {
-            return await prisma.usuario.findUnique({ where: { email: email } });
+            return await prisma.usuario.findUnique({ where: { username } });
         } catch (error) { throw error; }
     }
 
     async getUserById(id) {
         try {
-            return await prisma.usuario.findUnique({ where: { id: id } });
+            return await prisma.usuario.findUnique({ where: { id } });
         } catch (error) { throw error; }
     }
 
     async restoreUser(id) {
         try {
             return await prisma.usuario.update({ 
-                where: { id: id },
+                where: { id },
                 data: { activo: true },
-                select: { id: true, nombre: true, email: true, rol: true, activo: true }
+                select: this.userSelect
             });
         } catch (error) { throw error; }
     }

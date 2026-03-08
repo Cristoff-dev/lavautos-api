@@ -6,13 +6,11 @@ const authService = new AuthService();
 class AuthController {
     async login(req, res) {
         try {
-            const { email, password } = req.body;
-            // Pasamos un objeto limpio al servicio
-            const result = await authService.login({ email, password });
+            const { username, password } = req.body; // Cambio a username
+            const result = await authService.login({ username, password });
             
             return response.QuerySuccess(res, result, "Login successful.");
         } catch (error) {
-            // Mapeo de errores de lógica de negocio a respuestas HTTP
             if (error.message === 'USER_NOT_FOUND' || error.message === 'INVALID_PASSWORD') {
                 return response.ItemNotFound(res, "Invalid credentials.");
             }
