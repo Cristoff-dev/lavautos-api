@@ -144,3 +144,21 @@ model TransaccionContable {
   ordenId Int?
   orden   OrdenDeTrabajo? @relation(fields: [ordenId], references: [id])
 }
+
+model Provider {
+  id          String   @id @default(uuid())
+  name        String
+  contactName String?
+  phone       String?
+  email       String?
+  address     String?
+  isActive    Boolean  @default(true)
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  isActive    Boolean  @default(true)
+}

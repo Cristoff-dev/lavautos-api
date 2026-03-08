@@ -4,3 +4,6 @@ dist/
 node_modules/.prisma
 /prisma/migrations
 *.log
+err.txt
+typescript_errors.txt
+ts_errors.log

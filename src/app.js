@@ -11,7 +11,8 @@ import authRoute from "./modules/auth/auth.route.js";
 import usersRoute from "./modules/users/users.route.js";
 import vehiclesRoute from "./modules/vehicles/vehicles.route.js";
 import ordersRoute from "./modules/orders/orders.route.js";       // La pista/cola
-import servicesRoute from "./modules/services/services.route.js"; // El catálogo
+import servicesRoute from "./modules/services/services.routes.js"; // El catálogo
+import providersRoute from "./modules/providers/providers.routes.js"; // Proveedores
 import inventoryRoute from "./modules/inventory/inventory.route.js"; // Químicos
 import financeRoute from "./modules/finance/finance.route.js";    // Facturación y reportes
 
@@ -51,6 +52,7 @@ app.use(`${urlApiBase}/users`, usersRoute);
 app.use(`${urlApiBase}/vehicles`, vehiclesRoute);
 app.use(`${urlApiBase}/orders`, ordersRoute);
 app.use(`${urlApiBase}/services`, servicesRoute);
+app.use(`${urlApiBase}/providers`, providersRoute);
 app.use(`${urlApiBase}/inventory`, inventoryRoute);
 app.use(`${urlApiBase}/finance`, financeRoute);
 
