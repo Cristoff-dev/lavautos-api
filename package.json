@@ -37,11 +37,25 @@
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
-    "puppeteer": "^24.37.3"
+    "puppeteer": "^24.37.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "autoprefixer": "^10.4.27",
     "nodemon": "^3.1.11",
+    "postcss": "^8.5.8",
     "prisma": "^6.4.1",
-    "swagger-autogen": "^2.23.7"
+    "swagger-autogen": "^2.23.7",
+    "tailwindcss": "^4.2.1",
+    "vite": "^7.3.1"
+  },
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5.9.3"
   }
 }
