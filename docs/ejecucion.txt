@@ -1,0 +1,81 @@
+================================================================================
+          📚 GUÍA TÉCNICA DE DESARROLLO - API LAVAUTOS 🚀
+================================================================================
+
+ESTÁNDAR DE ARCHIVOS POR MÓDULO (Obligatorio en src/modules/):
+1. [modulo].controller.js -> Manejo de Req y Res (HTTP).
+2. [modulo].service.js    -> Lógica de negocio y validaciones de reglas.
+3. [modulo].route.js      -> Definición de Endpoints (Verbo + Path).
+4. [modulo].middleware.js -> Validaciones de formato (nombres, emails, tipos).
+5. [modulo].model.js      -> Consultas directas a Prisma (Select, Create, Update).
+
+--------------------------------------------------------------------------------
+1. AUTH (Seguridad)
+   - Propósito: Controlar el acceso al sistema mediante JWT.
+   - Tabla: Usuario.
+   - Qué hace: Login, verificación de estado 'activo' y generación de token.
+   - Relación: Valida los roles (Admin, Cajero, etc.) para todo el sistema.
+
+2. USERS (Talento Humano)
+   - Propósito: Gestionar el personal que opera el negocio.
+   - Tabla: Usuario.
+   - Qué hace: CRUD de empleados. No permite que un Admin se desactive a sí mismo.
+   - Relación: Los 'Lavadores' registrados aquí se asignan a los servicios.
+
+3. CLIENTS (Base de Datos de Personas)
+   - Propósito: Registro único de Clientes (Dueños) y Conductores (Afiliados).
+   - Tabla: Cliente.
+   - Qué hace: Guarda Cédula, Nombre y Teléfono. 
+   - Relación: Un Cliente es dueño de un 'TipoVehiculo' y conductor en 'Vehiculo'.
+
+4. TYPE_VEHICLES (ADN del Vehículo)
+   - Propósito: Registro único de la ficha técnica del auto.
+   - Tabla: TipoVehiculo.
+   - Qué hace: Guarda Placa, Marca, Modelo, Color y Dueño fijo.
+   - Relación: Es la base para crear cualquier entrada a la cola de lavado.
+
+5. VEHICLES (Operación / Cola de Lavado)
+   - Propósito: Gestionar el proceso real en la pista de lavado.
+   - Tabla: Vehiculo.
+   - Qué hace: Registra estados (ESPERA, LAVADO, LISTO), asigna lavador y 
+     calcula la comisión del 25% automáticamente.
+   - Afecta a: Finance (genera cobro) y Inventory (gasta químicos).
+
+6. SERVICES (Catálogo y Recetas)
+   - Propósito: Definir precios y qué insumos gasta cada servicio.
+   - Tablas: Servicio, DetalleServicio, ServicioInsumo.
+   - Qué hace: Define si es 'Combo' y cuánta cantidad de químico usa (dosificación).
+   - Afecta a: Inventory (le dice cuánto restar por cada carro lavado).
+
+7. INVENTORY (Insumos Químicos)
+   - Propósito: Controlar el stock de Shampoo, Ceras, etc.
+   - Tabla: Insumo.
+   - Qué hace: Resta stock en lavados y suma stock en compras.
+   - Alerta: Dispara avisos cuando el stock llega al mínimo.
+
+8. PROVIDERS (Suministros)
+   - Propósito: Directorio de a quién le compramos los químicos.
+   - Tabla: Proveedor.
+   - Qué hace: CRUD de proveedores con RIF y contacto.
+
+9. PURCHASES (Compras de Mercancía)
+   - Propósito: Aumentar inventario y registrar egresos de dinero.
+   - Tablas: Compra, DetalleCompra.
+   - Afecta a: Inventory (suma stock) y Finance (crea un egreso contable).
+
+10. EXPENSES (Gastos Operativos)
+    - Propósito: Registrar pagos ajenos a insumos (Luz, Agua, Alquiler).
+    - Tabla: GastoOperativo.
+    - Afecta a: Finance (crea un egreso contable que resta de la utilidad).
+
+11. FINANCE (Contabilidad Centralizada)
+    - Propósito: El Libro Mayor del negocio.
+    - Tabla: TransaccionContable.
+    - Qué hace: Centraliza ingresos (Lavados) y egresos (Compras/Gastos).
+    - Resultado: Reporte de utilidad neta y balance de caja.
+
+--------------------------------------------------------------------------------
+REGLA PARA TODOS: 
+Cualquier acción que mueva dinero o productos (Lavado, Compra, Gasto) 
+DEBE dejar un rastro en el módulo de FINANCE o INVENTORY respectivamente.
+--------------------------------------------------------------------------------

@@ -6,7 +6,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
-// import routes (Alineado con las nuevas carpetas y la extensión .routes.js)
 import authRoute from "./modules/auth/auth.route.js";
 import usersRoute from "./modules/users/users.route.js";
 import clientsRoute from "./modules/clients/clients.route.js";
