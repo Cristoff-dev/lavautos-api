@@ -18,7 +18,7 @@ export const obtenerProveedor = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const proveedor = await prisma.provider.findFirst({
-            where: { id, isActive: true }
+            where: { id: id as string, isActive: true }
         });
 
         if (!proveedor) {
@@ -46,7 +46,7 @@ export const actualizarProveedor = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const proveedor = await prisma.provider.update({
-            where: { id, isActive: true },
+            where: { id: id as string, isActive: true },
             data: req.body as any
         });
         res.json(proveedor);
@@ -59,7 +59,7 @@ export const eliminarProveedor = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         await prisma.provider.update({
-            where: { id },
+            where: { id: id as string },
             data: { isActive: false }
         });
         res.json({ mensaje: 'Proveedor eliminado correctamente' });
