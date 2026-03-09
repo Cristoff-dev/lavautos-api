@@ -69,15 +69,16 @@ model Vehiculo {
 // 3. CATÁLOGO E INVENTARIO
 // ==========================================
 model Servicio {
-  id          Int     @id @default(autoincrement())
-  nombre      String  @unique
-  precio      Float
-  descripcion String? // <--- AGREGA ESTA LÍNEA (el ? lo hace opcional)
-  esCombo     Boolean @default(false)
-  activo      Boolean @default(true)
+  id               Int     @id @default(autoincrement())
+  nombre           String  @unique
+  precio           Float
+  descripcion      String?
+  duracionMinutos  Int?
+  esCombo          Boolean @default(false)
+  activo           Boolean @default(true)
 
-  detalles DetalleOrden[]
-  dosificacion   ServicioInsumo[]
+  detalles     DetalleOrden[]
+  dosificacion ServicioInsumo[]
 }
 
 model Insumo {
