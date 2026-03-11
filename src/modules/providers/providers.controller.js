@@ -1,9 +1,8 @@
-import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const obtenerProveedores = async (req: Request, res: Response) => {
+export const obtenerProveedores = async (req, res) => {
     try {
         const proveedores = await prisma.provider.findMany({
             where: { isActive: true }
@@ -14,11 +13,11 @@ export const obtenerProveedores = async (req: Request, res: Response) => {
     }
 };
 
-export const obtenerProveedor = async (req: Request, res: Response) => {
+export const obtenerProveedor = async (req, res) => {
     try {
         const { id } = req.params;
         const proveedor = await prisma.provider.findFirst({
-            where: { id: id as string, isActive: true }
+            where: { id: id, isActive: true }
         });
 
         if (!proveedor) {
@@ -31,10 +30,10 @@ export const obtenerProveedor = async (req: Request, res: Response) => {
     }
 };
 
-export const crearProveedor = async (req: Request, res: Response) => {
+export const crearProveedor = async (req, res) => {
     try {
         const proveedor = await prisma.provider.create({
-            data: req.body as any
+            data: req.body
         });
         res.status(201).json(proveedor);
     } catch (error) {
@@ -42,12 +41,12 @@ export const crearProveedor = async (req: Request, res: Response) => {
     }
 };
 
-export const actualizarProveedor = async (req: Request, res: Response) => {
+export const actualizarProveedor = async (req, res) => {
     try {
         const { id } = req.params;
         const proveedor = await prisma.provider.update({
-            where: { id: id as string, isActive: true },
-            data: req.body as any
+            where: { id: id, isActive: true },
+            data: req.body
         });
         res.json(proveedor);
     } catch (error) {
@@ -55,11 +54,11 @@ export const actualizarProveedor = async (req: Request, res: Response) => {
     }
 };
 
-export const eliminarProveedor = async (req: Request, res: Response) => {
+export const eliminarProveedor = async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.provider.update({
-            where: { id: id as string },
+            where: { id: id },
             data: { isActive: false }
         });
         res.json({ mensaje: 'Proveedor eliminado correctamente' });
