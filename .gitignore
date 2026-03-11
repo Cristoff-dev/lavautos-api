@@ -1,10 +1,14 @@
 # Node modules and build outputs
 node_modules/
 
-env files (never commit your secrets)
+# Environment files (never commit your secrets)
 .env
 .env.local
 .env.*.local
+# common variants
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Build directories
 dist/
