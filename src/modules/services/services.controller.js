@@ -16,8 +16,8 @@ export const obtenerServicios = async (req, res) => {
 export const obtenerServicio = async (req, res) => {
     try {
         const { id } = req.params;
-        const servicio = await prisma.servicio.findFirst({
-            where: { id: Number(id), activo: true }
+        const servicio = await prisma.servicio.findUnique({
+            where: { id: Number(id) }
         });
 
         if (!servicio) {
@@ -50,7 +50,8 @@ export const actualizarServicio = async (req, res) => {
         });
         res.json(servicio);
     } catch (error) {
-        res.status(500).json({ error: 'Error al actualizar el servicio' });
+        console.error('Error in actualizarServicio: ', error);
+        res.status(500).json({ error: 'Error al actualizar el servicio', detalle: error.message });
     }
 };
 
