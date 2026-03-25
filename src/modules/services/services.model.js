@@ -1,1 +1,1 @@
-// Módulo aún no implementado.\n// Se puede completar con clases/funciones según sea necesario.\nexport default {};
+// Mï¿½dulo aï¿½n no implementado.\n// Se puede completar con clases/funciones segï¿½n sea necesario.\nexport default {};
