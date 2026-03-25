@@ -149,16 +149,8 @@ model Servicio {
   duracionMinutos  Int?
   esCombo          Boolean @default(false)
   activo           Boolean @default(true)
-  tipoVehiculo     TipoVehiculo @default(SEDAN)
+  tipoVehiculo     String  @default("SEDAN")
 
-  detalles     DetalleOrden[]
-  dosificacion ServicioInsumo[]
-  id           Int               @id @default(autoincrement())
-  nombre       String            @unique
-  precio       Float
-  esCombo      Boolean           @default(false)
-  activo       Boolean           @default(true) // <-- Soft Delete
-  
   detalles     DetalleServicio[]
   dosificacion ServicioInsumo[]
 
