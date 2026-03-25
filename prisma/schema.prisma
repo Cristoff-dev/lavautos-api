@@ -142,6 +142,17 @@ model GastoOperativo {
 // 6. SERVICIOS E INVENTARIO
 // ==========================================
 model Servicio {
+  id               Int     @id @default(autoincrement())
+  nombre           String  @unique
+  precio           Float
+  descripcion      String?
+  duracionMinutos  Int?
+  esCombo          Boolean @default(false)
+  activo           Boolean @default(true)
+  tipoVehiculo     TipoVehiculo @default(SEDAN)
+
+  detalles     DetalleOrden[]
+  dosificacion ServicioInsumo[]
   id           Int               @id @default(autoincrement())
   nombre       String            @unique
   precio       Float
@@ -225,4 +236,22 @@ model Usuario {
 
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+}
+
+model Provider {
+  id          String   @id @default(uuid())
+  name        String
+  contactName String?
+  phone       String?
+  email       String?
+  address     String?
+  isActive    Boolean  @default(true)
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  isActive    Boolean  @default(true)
 }
