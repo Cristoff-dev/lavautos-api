@@ -7,16 +7,15 @@ async function main() {
     console.log('🌱 Iniciando la carga de datos (Seed)...');
 
     // 1. CREAR ADMINISTRADOR INICIAL
-    const adminPassword = await bcrypt.hash('Admin123*', 10);
+    const adminPassword = await bcrypt.hash('Admin123', 10);
 
     const admin = await prisma.usuario.upsert({
-        where: { username: 'admin' },
+        where: { username: 'admin@lavautos.com' },
         update: {},
         create: {
             username: 'admin@lavautos.com',
             nombre: 'Administrador General',
-            password: admin123,
-            rol: 'ADMIN',
+            password: adminPassword,
             activo: true,
         },
     });
