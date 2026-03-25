@@ -1,4 +1,0 @@
-$kind: collection
-name: Auth
-description: Endpoints de autenticación
-order: 1000
