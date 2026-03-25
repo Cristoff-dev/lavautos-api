@@ -76,6 +76,7 @@ model Servicio {
   duracionMinutos  Int?
   esCombo          Boolean @default(false)
   activo           Boolean @default(true)
+  tipoVehiculo     TipoVehiculo @default(SEDAN)
 
   detalles     DetalleOrden[]
   dosificacion ServicioInsumo[]
