@@ -28,16 +28,8 @@ Si cambian el nombre de la llave en el .env, el sistema de Login dejará de func
 4. Generar Prisma: Ejecutar "npx prisma generate"
 5. Cargar Datos Base: Ejecutar "node prisma/seed.js" (Crea el Admin y Servicios).
 
-3. ARQUITECTURA (CÓMO TRABAJAR)
--------------------------------
-El proyecto se divide en 5 capas para mantener el orden:
-- Route: Define la URL (ej: /users) y quién entra (ADMIN, CAJERO, etc).
-- Middleware: Valida que los datos que envía el usuario sean correctos.
-- Controller: Gestiona la petición y envía la respuesta.
-- Service: Contiene la lógica (encriptación, cálculos, reglas de negocio).
-- Model: Realiza las operaciones en la base de datos con Prisma.
 
-4. DICCIONARIO DE LA BASE DE DATOS (ENUMS)
+3. DICCIONARIO DE LA BASE DE DATOS (ENUMS)
 ------------------------------------------
 Solo se aceptan estos valores exactos (en mayúsculas):
 - Roles: ADMIN, CAJERO, SUPERVISOR, LAVADOR.
@@ -45,19 +37,19 @@ Solo se aceptan estos valores exactos (en mayúsculas):
 - Estados: EN_ESPERA, EN_LAVADO, LISTO, PAGADO_Y_ENTREGADO.
 - Pagos: EFECTIVO, TRANSFERENCIA, PAGO_MOVIL, POR_DEFINIR.
 
-5. CÓMO PROBAR LA API (POSTMAN)
+4. CÓMO PROBAR LA API (POSTMAN)
 -------------------------------
 1. Iniciar sesión: POST a "/api/lavautos/auth/login" con las credenciales de Admin.
 2. Obtener Token: Copia el código largo que devuelve la API.
 3. Autorizar: En las demás rutas, ve a la pestaña "Auth" -> "Bearer Token" y pega el código. Sin esto, la API dará error 401 Unauthorized.
 
-6. COMANDOS DEL DÍA A DÍA
+. COMANDOS DEL DÍA A DÍA
 -------------------------
 - npm run dev : Inicia el servidor con reinicio automático.
 - npx prisma studio : Abre una interfaz web para ver los datos de las tablas.
 - npx prisma db push : Usa esto si modificas el archivo "schema.prisma".
 
-7. REGLAS GENERALES
+6. REGLAS GENERALES
 -------------------
 - No subir el archivo .env al repositorio.
 - Usar las respuestas de "src/shared/utils/responses.js" para todos los mensajes.

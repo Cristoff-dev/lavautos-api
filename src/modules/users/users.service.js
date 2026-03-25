@@ -1,14 +1,14 @@
 import bcrypt from 'bcrypt';
 import ModelUsers from './users.model.js';
+
 const model = new ModelUsers();
 
 class ServiceUsers {
-    constructor() { }
-
     async addUser(object) {
         try {
-            const existingUser = await model.getUserByEmail(object.email);
-            if (existingUser) throw new Error('Already exist email.');
+            // Validación por username
+            const existingUser = await model.getUserByUsername(object.username);
+            if (existingUser) throw new Error('USERNAME_ALREADY_EXISTS');
 
             object.password = await bcrypt.hash(object.password, 10);
             return await model.addUser(object);
@@ -23,41 +23,48 @@ class ServiceUsers {
 
     async deleteUser(id, currentUser) {
         try {
-            if (id === currentUser.id) throw new Error("You can not delete yourself.");
+            if (id === currentUser.id) throw new Error("CANNOT_DELETE_SELF");
             
             const user = await model.getUserById(id);
-            if (!user) throw new Error('User not found.');
+            if (!user) throw new Error('USER_NOT_FOUND');
 
             return await model.deleteUser(id);
         } catch (error) { throw error; }
     }
 
-    async updateUser(user, currentUser) {
+    async updateUser(userData, currentUser) {
         try {
-            // REGLAS DE ORO PARA EL ADMIN
-            if (user.id === currentUser.id) {
-                if (user.rol) throw new Error("No puedes cambiar tu propio rol.");
-                if (user.activo === false) throw new Error("No te puedes desactivar a ti mismo.");
+            const existingUser = await model.getUserById(userData.id);
+            if (!existingUser) throw new Error('USER_NOT_FOUND');
+
+            // Reglas de oro para el admin propio
+            if (userData.id === currentUser.id) {
+                if (userData.rol) throw new Error("CANNOT_CHANGE_OWN_ROLE");
+                if (userData.activo === false) throw new Error("CANNOT_DEACTIVATE_SELF");
             }
 
-            const existUser = await model.getUserById(user.id);
-            if (!existUser) throw new Error('User not found.');
-
-            // Hash de contraseña si viene en el update
-            if (user.password) {
-                user.password = await bcrypt.hash(user.password, 10);
+            // Validar si están cambiando el username y si el nuevo ya existe
+            if (userData.username && userData.username !== existingUser.username) {
+                const usernameOccupied = await model.getUserByUsername(userData.username);
+                if (usernameOccupied) throw new Error('USERNAME_ALREADY_EXISTS');
             }
 
-            const id = user.id;
-            delete user.id; // Limpiamos el objeto antes de enviar al model
-            return await model.updateUser(id, user);
+            if (userData.password) {
+                userData.password = await bcrypt.hash(userData.password, 10);
+            }
+
+            const idToUpdate = userData.id;
+            delete userData.id;
+            
+            return await model.updateUser(idToUpdate, userData);
         } catch (error) { throw error; }
     }
+
     async restoreUser(id) {
         try {
             const user = await model.getUserById(id);
-            if (!user) throw new Error('User not found.');
-            if (user.activo) throw new Error('User is already active.');
+            if (!user) throw new Error('USER_NOT_FOUND');
+            if (user.activo) throw new Error('USER_ALREADY_ACTIVE');
 
             return await model.restoreUser(id);
         } catch (error) { throw error; }

@@ -1,16 +1,22 @@
 import prisma from '../../shared/prisma/client.js';
 
 class AuthModel {
-    constructor() { }
-
-    async findByEmail(email) {
+    async findByUsername(username) {
         try {
-            const result = await prisma.usuario.findUnique({
-                where: { email },
-                select: { id: true, email: true, rol: true, password: true, nombre: true, activo: true }
+            return await prisma.usuario.findUnique({
+                where: { username },
+                select: { 
+                    id: true, 
+                    username: true, 
+                    rol: true, 
+                    password: true, 
+                    nombre: true, 
+                    activo: true 
+                }
             });
-            return result;
-        } catch (error) { throw error; }
+        } catch (error) {
+            throw new Error(`Database Error: ${error.message}`);
+        }
     }
 }
 
