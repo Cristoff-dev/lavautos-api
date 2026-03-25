@@ -11,12 +11,8 @@ import usersRoute from "./modules/users/users.route.js";
 import clientsRoute from "./modules/clients/clients.route.js";
 import typeVehiclesRoute from "./modules/type_vehicles/type_vehicles.route.js";
 import vehiclesRoute from "./modules/vehicles/vehicles.route.js";
-import providersRoute from "./modules/providers/providers.route.js";
 import purchasesRoute from "./modules/purchases/purchases.route.js";
 import expensesRoute from "./modules/expenses/expenses.route.js";
-import servicesRoute from "./modules/services/services.route.js";
-import inventoryRoute from "./modules/inventory/inventory.route.js";
-import financeRoute from "./modules/finance/finance.route.js";
 import ordersRoute from "./modules/orders/orders.route.js";       // La pista/cola
 import servicesRoute from "./modules/services/services.route.js"; // El catálogo
 import providersRoute from "./modules/providers/providers.routes.js"; // Proveedores
@@ -60,10 +56,10 @@ app.use(`${urlApiBase}/users`, usersRoute);
 app.use(`${urlApiBase}/clients`, clientsRoute);
 app.use(`${urlApiBase}/type-vehicles`, typeVehiclesRoute);
 app.use(`${urlApiBase}/vehicles`, vehiclesRoute);
-app.use(`${urlApiBase}/providers`, providersRoute);
 app.use(`${urlApiBase}/purchases`, purchasesRoute);
 app.use(`${urlApiBase}/expenses`, expensesRoute);
 app.use(`${urlApiBase}/services`, servicesRoute);
+app.use(`${urlApiBase}/orders`, ordersRoute);
 app.use(`${urlApiBase}/providers`, providersRoute);
 app.use(`${urlApiBase}/inventory`, inventoryRoute);
 app.use(`${urlApiBase}/finance`, financeRoute);
