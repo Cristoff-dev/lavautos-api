@@ -10,12 +10,12 @@ async function main() {
     const adminPassword = await bcrypt.hash('Admin123*', 10);
 
     const admin = await prisma.usuario.upsert({
-        where: { username: 'admin' }, 
-        update: {}, 
+        where: { username: 'admin' },
+        update: {},
         create: {
-            username: 'admin',
+            username: 'admin@lavautos.com',
             nombre: 'Administrador General',
-            password: adminPassword,
+            password: admin123,
             rol: 'ADMIN',
             activo: true,
         },
@@ -27,7 +27,7 @@ async function main() {
     const servicios = [
         { nombre: 'Lavado Sencillo', precio: 10.0, esCombo: false },
         { nombre: 'Lavado Premium', precio: 25.0, esCombo: false },
-        { nombre: 'Combo Limpieza Total', precio: 45.0, esCombo: true }, 
+        { nombre: 'Combo Limpieza Total', precio: 45.0, esCombo: true },
     ];
 
     for (const s of servicios) {
@@ -50,7 +50,7 @@ async function main() {
         await prisma.insumo.upsert({
             where: { nombre: i.nombre },
             update: {},
-            create: i, 
+            create: i,
         });
     }
     console.log('✅ Inventario de insumos cargado');
@@ -68,7 +68,7 @@ async function main() {
         }
     });
     console.log(`✅ Cliente de prueba verificado: ${clientePrueba.nombre}`);
-    
+
     console.log('🚀 Base de datos lista para pruebas.');
 }
 
