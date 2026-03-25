@@ -17,6 +17,12 @@ import expensesRoute from "./modules/expenses/expenses.route.js";
 import servicesRoute from "./modules/services/services.route.js";
 import inventoryRoute from "./modules/inventory/inventory.route.js";
 import financeRoute from "./modules/finance/finance.route.js";
+import ordersRoute from "./modules/orders/orders.route.js";       // La pista/cola
+import servicesRoute from "./modules/services/services.route.js"; // El catálogo
+import providersRoute from "./modules/providers/providers.routes.js"; // Proveedores
+import inventoryRoute from "./modules/inventory/inventory.route.js"; // Químicos
+import financeRoute from "./modules/finance/finance.route.js";    // Facturación y reportes
+
 const app = express();
 
 app.set("port", process.env.PORT || 3000);
@@ -24,7 +30,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("combined"));
 app.use(cors({
-    origin: ["http://localhost:5173"], // Ideal para React/Vue/Vite
+    // Permitir orígenes usados durante desarrollo (Vite puede usar 5173 o 5174)
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
@@ -57,6 +64,7 @@ app.use(`${urlApiBase}/providers`, providersRoute);
 app.use(`${urlApiBase}/purchases`, purchasesRoute);
 app.use(`${urlApiBase}/expenses`, expensesRoute);
 app.use(`${urlApiBase}/services`, servicesRoute);
+app.use(`${urlApiBase}/providers`, providersRoute);
 app.use(`${urlApiBase}/inventory`, inventoryRoute);
 app.use(`${urlApiBase}/finance`, financeRoute);
 
