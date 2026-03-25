@@ -1,0 +1,4 @@
+$kind: collection
+name: Providers
+description: CRUD de proveedores
+order: 3000

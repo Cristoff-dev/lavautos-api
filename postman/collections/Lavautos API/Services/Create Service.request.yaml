@@ -1,0 +1,40 @@
+$kind: http-request
+name: Create Service
+description: Crea un nuevo servicio de lavado
+method: POST
+url: '{{base_url}}{{api_base}}/services'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Lavado Premium Test",
+      "description": "Lavado completo con encerado y aspirado interior",
+      "price": 25.00,
+      "duration": 60
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Response is JSON", function () {
+          pm.response.to.have.header("Content-Type", /application\/json/);
+      });
+
+      pm.test("Created service has required fields", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("id");
+          pm.expect(jsonData).to.have.property("name");
+          pm.expect(jsonData.name).to.eql("Lavado Premium Test");
+          pm.expect(jsonData).to.have.property("price");
+          
+          // Guardar ID para tests de update/delete
+          pm.collectionVariables.set("service_id", jsonData.id);
+      });

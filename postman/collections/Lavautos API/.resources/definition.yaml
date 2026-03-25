@@ -1,0 +1,37 @@
+$kind: collection
+name: Lavautos API
+description: |-
+  Colección de endpoints para el API de Lavautos.
+  
+  ## Módulos incluidos:
+  - **Auth**: Autenticación JWT
+  - **Services**: CRUD de servicios de lavado
+  - **Providers**: CRUD de proveedores
+  
+  ## Variables de colección:
+  - `base_url`: URL base del servidor (default: http://localhost:3000)
+  - `api_base`: Prefijo del API (default: /api/lavautos)
+  - `token`: Token JWT para autenticación
+  - `service_id`: ID del servicio para operaciones CRUD
+  - `provider_id`: ID del proveedor para operaciones CRUD
+  
+  ## Uso:
+  1. Ejecutar primero el request "Login" para obtener el token
+  2. El token se guarda automáticamente en las variables
+  3. Ejecutar los demás requests según necesidad
+variables:
+  - key: base_url
+    value: 'http://localhost:3000'
+    description: URL base del servidor
+  - key: api_base
+    value: '/api/lavautos'
+    description: Prefijo del API
+  - key: token
+    value: ''
+    description: Token JWT de autenticación
+  - key: service_id
+    value: ''
+    description: ID del servicio actual
+  - key: provider_id
+    value: ''
+    description: ID del proveedor actual

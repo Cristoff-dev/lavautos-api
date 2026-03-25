@@ -1,0 +1,28 @@
+$kind: http-request
+name: 'Users - List'
+method: GET
+url: '{{base_url}}{{api_base_path}}/users'
+order: 2000
+headers:
+  - key: Authorization
+    value: 'Bearer {{auth_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200 or 401/403 when not authorized', function () {
+        pm.expect([200, 401, 403]).to.include(pm.response.code);
+      });
+
+      pm.test('Response is JSON', function () {
+        pm.response.to.be.json;
+      });
+
+      if (pm.response.code === 200) {
+        const json = pm.response.json();
+        pm.test('Body is an array or object with data array', function () {
+          const isArray = Array.isArray(json);
+          const hasDataArray = Array.isArray(json?.data);
+          pm.expect(isArray || hasDataArray).to.equal(true);
+        });
+      }

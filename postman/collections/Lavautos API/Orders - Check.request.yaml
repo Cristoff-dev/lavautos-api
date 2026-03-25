@@ -1,0 +1,22 @@
+$kind: http-request
+name: 'Orders - Check'
+method: GET
+url: '{{base_url}}{{api_base_path}}/orders/check'
+order: 7000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test('Response is JSON', function () {
+        pm.response.to.be.json;
+      });
+
+      const json = pm.response.json();
+      pm.test('Has message string', function () {
+        pm.expect(json).to.have.property('message');
+        pm.expect(json.message).to.be.a('string');
+      });

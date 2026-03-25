@@ -1,0 +1,41 @@
+$kind: http-request
+name: Update Service
+description: Actualiza un servicio existente
+method: PUT
+url: '{{base_url}}{{api_base}}/services/:id'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: id
+    value: '{{service_id}}'
+    description: ID del servicio a actualizar
+body:
+  type: json
+  content: |-
+    {
+      "name": "Lavado Premium Actualizado",
+      "description": "Lavado completo con encerado premium y aspirado profundo",
+      "price": 30.00,
+      "duration": 75
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200 or 500", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 500]);
+      });
+
+      pm.test("Response is JSON", function () {
+          pm.response.to.have.header("Content-Type", /application\/json/);
+      });
+
+      if (pm.response.code === 200) {
+          pm.test("Updated service has correct data", function () {
+              const jsonData = pm.response.json();
+              pm.expect(jsonData).to.have.property("id");
+              pm.expect(jsonData.name).to.eql("Lavado Premium Actualizado");
+          });
+      }

@@ -1,0 +1,40 @@
+$kind: http-request
+name: Get Provider by ID
+description: Obtiene un proveedor específico por su ID
+method: GET
+url: '{{base_url}}{{api_base}}/providers/:id'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: id
+    value: '{{provider_id}}'
+    description: ID del proveedor a consultar
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 200 or 404", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 404]);
+      });
+
+      pm.test("Response is JSON", function () {
+          pm.response.to.have.header("Content-Type", /application\/json/);
+      });
+
+      if (pm.response.code === 200) {
+          pm.test("Provider has required fields", function () {
+              const jsonData = pm.response.json();
+              pm.expect(jsonData).to.have.property("id");
+              pm.expect(jsonData).to.have.property("name");
+              pm.expect(jsonData).to.have.property("isActive");
+          });
+      }
+
+      if (pm.response.code === 404) {
+          pm.test("Error message is present", function () {
+              const jsonData = pm.response.json();
+              pm.expect(jsonData).to.have.property("error");
+          });
+      }

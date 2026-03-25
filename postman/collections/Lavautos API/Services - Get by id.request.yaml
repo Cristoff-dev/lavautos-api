@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Services - Get by id'
+method: GET
+url: '{{base_url}}{{api_base_path}}/services/:id'
+order: 4000
+pathVariables:
+  - key: id
+    value: '1'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200 or 404', function () {
+        pm.expect([200, 404]).to.include(pm.response.code);
+      });
+
+      pm.test('Response is JSON', function () {
+        pm.response.to.be.json;
+      });
+
+      if (pm.response.code === 200) {
+        const json = pm.response.json();
+        pm.test('Body is an object (or wrapped in data)', function () {
+          const payload = json?.data ?? json;
+          pm.expect(payload).to.be.an('object');
+        });
+      }
