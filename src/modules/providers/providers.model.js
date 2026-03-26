@@ -13,7 +13,7 @@ class ModelProviders {
     getProviders = async () => {
         try {
             return await prisma.proveedor.findMany({
-                orderBy: { nombre: 'asc' },
+                orderBy: [{ activo: 'desc' }, { nombre: 'asc' }],
                 select: { id: true, rif: true, nombre: true, telefono: true, email: true, activo: true }
             });
         } catch (error) { throw error; }
@@ -43,10 +43,7 @@ class ModelProviders {
 
     deleteProvider = async (id) => {
         try {
-            return await prisma.proveedor.update({
-                where: { id },
-                data: { activo: false }
-            });
+            return await prisma.proveedor.delete({ where: { id } });
         } catch (error) { throw error; }
     }
 }

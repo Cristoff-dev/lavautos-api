@@ -6,14 +6,14 @@ import {
     actualizarProveedor,
     eliminarProveedor
 } from './providers.controller.js';
-import { validarProveedor } from './providers.middleware.js';
+import { validarCrearProveedor, validarActualizarProveedor } from './providers.middleware.js';
 
 const router = express.Router();
 
 router.get('/', obtenerProveedores);
 router.get('/:id', obtenerProveedor);
-router.post('/', validarProveedor, crearProveedor);
-router.put('/:id', validarProveedor, actualizarProveedor);
+router.post('/', validarCrearProveedor, crearProveedor);
+router.put('/:id', validarActualizarProveedor, actualizarProveedor);
 router.delete('/:id', eliminarProveedor);
 
 export default router;

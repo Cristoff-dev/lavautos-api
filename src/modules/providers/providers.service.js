@@ -28,7 +28,7 @@ class ServiceProviders {
 
     updateProvider = async (providerData) => {
         try {
-            const { id, rif, ...dataToUpdate } = providerData;
+            const { id, ...dataToUpdate } = providerData;
 
             const existProvider = await model.getProviderById(id);
             if (!existProvider) throw new Error('PROVIDER_NOT_FOUND');

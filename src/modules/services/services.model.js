@@ -13,6 +13,7 @@ class ModelServices {
     getServices = async () => {
         try {
             return await prisma.servicio.findMany({
+                where: { activo: true },
                 orderBy: { nombre: 'asc' },
                 select: { id: true, nombre: true, precio: true, descripcion: true, duracionMinutos: true, esCombo: true, activo: true, tipoVehiculo: true }
             });
