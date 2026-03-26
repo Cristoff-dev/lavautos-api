@@ -1,1 +1,8 @@
-// Módulo aún no implementado.\n// Se puede completar con clases/funciones según sea necesario.\nexport default {};
+// Middlewares del mÃ³dulo de servicios.
+// Si en un futuro se requiere validar datos de entrada o permisos
+// especÃ­ficos, se pueden aÃ±adir aquÃ­. Por ahora no hay reglas extra.
+
+export function validarServicio(req, res, next) {
+    // ejemplo: comprobar que precio y nombre estÃ©n presentes
+    next();
+}
