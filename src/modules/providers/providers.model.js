@@ -13,7 +13,6 @@ class ModelProviders {
     getProviders = async () => {
         try {
             return await prisma.proveedor.findMany({
-                where: { activo: true },
                 orderBy: { nombre: 'asc' },
                 select: { id: true, rif: true, nombre: true, telefono: true, email: true, activo: true }
             });
