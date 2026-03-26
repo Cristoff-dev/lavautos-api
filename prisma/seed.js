@@ -7,26 +7,26 @@ async function main() {
     console.log('🌱 Iniciando la carga de datos (Seed)...');
 
     // 1. CREAR ADMINISTRADOR INICIAL
-    const adminPassword = await bcrypt.hash('Admin123', 10);
+    const adminPassword = await bcrypt.hash('Admin123*', 10);
 
     const admin = await prisma.usuario.upsert({
-        where: { username: 'admin@lavautos.com' },
+        where: { email: 'admin@lavautos.com' },
         update: {},
         create: {
-            username: 'admin@lavautos.com',
+            email: 'admin@lavautos.com',
             nombre: 'Administrador General',
             password: adminPassword,
+            rol: 'ADMIN',
             activo: true,
         },
     });
-    // Corregido: Ahora imprime admin.username en lugar de admin.email
-    console.log(`✅ Usuario Admin verificado: ${admin.username}`);
+    console.log(`✅ Usuario Admin verificado: ${admin.email}`);
 
-    // 2. CREAR TIPOS DE SERVICIOS
+    // 2. CREAR TIPOS DE SERVICIOS (Ajustado: sin 'descripcion', con 'esCombo')
     const servicios = [
         { nombre: 'Lavado Sencillo', precio: 10.0, esCombo: false },
         { nombre: 'Lavado Premium', precio: 25.0, esCombo: false },
-        { nombre: 'Combo Limpieza Total', precio: 45.0, esCombo: true },
+        { nombre: 'Combo Limpieza Total', precio: 45.0, esCombo: true }, // Ejemplo de combo
     ];
 
     for (const s of servicios) {
@@ -38,7 +38,7 @@ async function main() {
     }
     console.log('✅ Catálogo de servicios inicializado');
 
-    // 3. CREAR INSUMOS CRÍTICOS
+    // 3. CREAR INSUMOS CRÍTICOS (Ajustado: sin 'unidad', solo métricas numéricas)
     const insumos = [
         { nombre: 'Champú Activo', stockActual: 100.0, stockMinimo: 20.0 },
         { nombre: 'Desengrasante', stockActual: 50.0, stockMinimo: 10.0 },
@@ -53,20 +53,6 @@ async function main() {
         });
     }
     console.log('✅ Inventario de insumos cargado');
-
-    // 4. CLIENTE DE PRUEBA
-    const clientePrueba = await prisma.cliente.upsert({
-        where: { cedula: '10101010' },
-        update: {},
-        create: {
-            cedula: '10101010',
-            nombre: 'Cliente de Prueba Postman',
-            telefono: '555000111',
-            email: 'test@cliente.com', // El cliente SÍ puede conservar su email
-            activo: true
-        }
-    });
-    console.log(`✅ Cliente de prueba verificado: ${clientePrueba.nombre}`);
 
     console.log('🚀 Base de datos lista para pruebas.');
 }
