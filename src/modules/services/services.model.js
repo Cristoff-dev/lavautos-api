@@ -13,8 +13,7 @@ class ModelServices {
     getServices = async () => {
         try {
             return await prisma.servicio.findMany({
-                where: { activo: true },
-                orderBy: { nombre: 'asc' },
+                orderBy: [{ activo: 'desc' }, { nombre: 'asc' }],
                 select: { id: true, nombre: true, precio: true, descripcion: true, duracionMinutos: true, esCombo: true, activo: true, tipoVehiculo: true }
             });
         } catch (error) { throw error; }
@@ -44,10 +43,7 @@ class ModelServices {
 
     deleteService = async (id) => {
         try {
-            return await prisma.servicio.update({
-                where: { id },
-                data: { activo: false }
-            });
+            return await prisma.servicio.delete({ where: { id } });
         } catch (error) { throw error; }
     }
 }
