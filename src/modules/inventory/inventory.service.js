@@ -240,6 +240,14 @@ class ServiceInventory {
         } catch (error) { throw error; }
     }
 
+    getInsumosDropdown = async () => {
+        try {
+            return await model.getInsumosDropdown();
+        } catch (error) { 
+            throw error; 
+        }
+    }   
+    
     // Obtener historial de un insumo
     getHistorialInsumo = async (id) => {
         try {
