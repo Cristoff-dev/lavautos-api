@@ -1,1 +1,96 @@
-// M骴ulo a鷑 no implementado.\n// Se puede completar con clases/funciones seg鷑 sea necesario.\nexport default {};
+import response from '../../shared/utils/responses.js';
+import validators from '../../shared/utils/format.data.js';
+
+// Validar ID de par谩metro
+const validateIdParam = (req, res, next) => {
+    const { id } = req.params;
+    if (!id || validators.formatNumberInvalid(id)) {
+        return response.BadRequest(res, 'ID inv谩lido o no proporcionado.');
+    }
+    next();
+};
+
+// Validar creaci贸n/actualizaci贸n de transacci贸n
+const validarTransaccion = (req, res, next) => {
+    const { categoria, descripcion, monto } = req.body;
+    let errors = [];
+
+    // Campos requeridos
+    if (!categoria) {
+        errors.push('La categor铆a es requerida.');
+    }
+    if (!descripcion) {
+        errors.push('La descripci贸n es requerida.');
+    }
+    if (monto === undefined || monto === null) {
+        errors.push('El monto es requerido.');
+    }
+
+    // Validar categor铆a
+    const categoriasValidas = [
+        'INGRESO_LAVADO',
+        'GASTO_OPERATIVO',
+        'COMPRA_INSUMO',
+        'OTRO_INGRESO',
+        'OTRO_EGRESO'
+    ];
+    if (categoria && !categoriasValidas.includes(categoria)) {
+        errors.push('Categor铆a inv谩lida.');
+    }
+
+    // Validar descripci贸n
+    if (descripcion && (typeof descripcion !== 'string' || descripcion.trim().length < 2)) {
+        errors.push('La descripci贸n debe tener al menos 2 caracteres.');
+    }
+    if (descripcion && descripcion.length > 500) {
+        errors.push('La descripci贸n no puede exceder los 500 caracteres.');
+    }
+
+    // Validar monto
+    if (monto !== undefined && (validators.formatMoneyInvalid(monto.toString()) || monto <= 0)) {
+        errors.push('El monto debe ser un n煤mero positivo.');
+    }
+    if (monto && monto > 999999999) {
+        errors.push('El monto no puede ser mayor a 999,999,999.');
+    }
+
+    if (errors.length > 0) return response.BadRequest(res, errors);
+    next();
+};
+
+// Validar fechas para historial
+const validarFechas = (req, res, next) => {
+    const { fechaInicio, fechaFin } = req.query;
+    let errors = [];
+
+    if (!fechaInicio) {
+        errors.push('La fecha de inicio es requerida.');
+    }
+    if (!fechaFin) {
+        errors.push('La fecha de fin es requerida.');
+    }
+
+    if (fechaInicio && fechaFin) {
+        const inicio = new Date(fechaInicio);
+        const fin = new Date(fechaFin);
+
+        if (isNaN(inicio.getTime())) {
+            errors.push('La fecha de inicio no es v谩lida.');
+        }
+        if (isNaN(fin.getTime())) {
+            errors.push('La fecha de fin no es v谩lida.');
+        }
+        if (inicio > fin) {
+            errors.push('La fecha de inicio no puede ser posterior a la fecha de fin.');
+        }
+    }
+
+    if (errors.length > 0) return response.BadRequest(res, errors);
+    next();
+};
+
+export default {
+    validateIdParam,
+    validarTransaccion,
+    validarFechas
+};

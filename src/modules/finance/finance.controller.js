@@ -1,1 +1,140 @@
-// M骴ulo a鷑 no implementado.\n// Se puede completar con clases/funciones seg鷑 sea necesario.\nexport default {};
+import response from '../../shared/utils/responses.js';
+import ServiceFinance from './finance.service.js';
+
+const service = new ServiceFinance();
+
+class ControllerFinance {
+    // Obtener balance/resumen
+    getBalance = async (req, res) => {
+        try {
+            const result = await service.obtenerResumen();
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Obtener historial de transacciones
+    getHistory = async (req, res) => {
+        try {
+            const result = await service.obtenerTransacciones();
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Crear transacci贸n
+    createTransaction = async (req, res) => {
+        try {
+            const result = await service.crearTransaccion(req.body);
+            return response.ItemCreated(res, result);
+        } catch (error) {
+            if (error.message === 'MONTO_DEBE_SER_POSITIVO') {
+                return response.BadRequest(res, "El monto debe ser un valor positivo.");
+            }
+            if (error.message === 'CATEGORIA_REQUERIDA') {
+                return response.BadRequest(res, "La categor铆a es requerida.");
+            }
+            if (error.message === 'DESCRIPCION_REQUERIDA') {
+                return response.BadRequest(res, "La descripci贸n es requerida.");
+            }
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Obtener transacci贸n por ID
+    getTransactionById = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const result = await service.obtenerTransaccionPorId(parseInt(id));
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            if (error.message === 'TRANSACCION_NOT_FOUND') {
+                return response.ItemNotFound(res, "Transacci贸n no encontrada.");
+            }
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Actualizar transacci贸n
+    updateTransaction = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const result = await service.actualizarTransaccion(parseInt(id), req.body);
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            if (error.message === 'TRANSACCION_NOT_FOUND') {
+                return response.ItemNotFound(res, "Transacci贸n no encontrada.");
+            }
+            if (error.message === 'MONTO_DEBE_SER_POSITIVO') {
+                return response.BadRequest(res, "El monto debe ser un valor positivo.");
+            }
+            if (error.message === 'DESCRIPCION_REQUERIDA') {
+                return response.BadRequest(res, "La descripci贸n es requerida.");
+            }
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Eliminar transacci贸n
+    deleteTransaction = async (req, res) => {
+        try {
+            const { id } = req.params;
+            await service.eliminarTransaccion(parseInt(id));
+            return response.ItemDeleted(res);
+        } catch (error) {
+            if (error.message === 'TRANSACCION_NOT_FOUND') {
+                return response.ItemNotFound(res, "Transacci贸n no encontrada.");
+            }
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Obtener resumen financiero detallado
+    getResumenFinanciero = async (req, res) => {
+        try {
+            const result = await service.getResumenFinanciero();
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Obtener historial por per铆odo
+    getHistorialTransacciones = async (req, res) => {
+        try {
+            const { fechaInicio, fechaFin, categoria } = req.query;
+            const result = await service.getHistorialTransacciones(fechaInicio, fechaFin, categoria);
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Obtener transacciones para dropdown
+    getTransaccionesDropdown = async (req, res) => {
+        try {
+            const result = await service.getTransaccionesDropdown();
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    // Calcular balance por per铆odo
+    calcularBalancePorPeriodo = async (req, res) => {
+        try {
+            const { fechaInicio, fechaFin } = req.query;
+            if (!fechaInicio || !fechaFin) {
+                return response.BadRequest(res, "Se requieren fechaInicio y fechaFin.");
+            }
+            const result = await service.calcularBalancePorPeriodo(fechaInicio, fechaFin);
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+}
+
+export default ControllerFinance;
