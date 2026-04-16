@@ -28,7 +28,7 @@ class ServiceServices {
 
     updateService = async (serviceData) => {
         try {
-            const { id, nombre, ...dataToUpdate } = serviceData;
+            const { id, ...dataToUpdate } = serviceData;
 
             const existService = await model.getServiceById(id);
             if (!existService) throw new Error('SERVICE_NOT_FOUND');
