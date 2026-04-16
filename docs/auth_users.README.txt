@@ -1,82 +1,132 @@
-DOCUMENTACIÓN TÉCNICA PARA FRONTEND: MÓDULOS AUTH & USERS
+DOCUMENTACIÓN TÉCNICA INTEGRAL: API ACUÁTICO SOFT
+=====================================================
+Base URL: http://localhost:3000/api/lavautos
+Formato: JSON (application/json)
+Auth: Authorization: Bearer <TOKEN_JWT>
+=====================================================
 
-1. ESPECIFICACIONES GENERALES
---------------------------------------------------
-- Base URL: http://localhost:3000/api/lavautos
-- Content-Type: application/json
-- Seguridad: Los endpoints protegidos requieren el Header: 
-  Authorization: Bearer <TOKEN_JWT>
-
-2. MÓDULO: AUTENTICACIÓN (AUTH)
---------------------------------------------------
-
-   POST /auth/login
-   - Descripción: Inicia sesión y obtiene el token de acceso.
-   - Body Requerido:
-     {
-       "email": "admin@lavautos.com",
-       "password": "Admin123*"
-     }
-   - Respuesta Exitosa (200 OK):
-     {
-       "success": true,
-       "code": "REQUEST_SUCCESSFUL",
-       "details": {
-         "token": "eyJhbGciOiJIUzI1...",
-         "user": {
-           "id": 1,
-           "email": "admin@lavautos.com",
-           "nombre": "Nombre Usuario",
-           "rol": "ADMIN"
-         }
-       }
-     }
-   - Errores posibles:
-     - 401: "Invalid email or password" (Credenciales incorrectas).
-     - 400: "Email and password are required" (Campos vacíos).
-
-3. MÓDULO: USUARIOS (USERS)
---------------------------------------------------
-
-   GET /users
-   - Descripción: Lista todos los usuarios (excepto al que hace la petición).
-   - Seguridad: Solo ADMIN.
-   - Respuesta Exitosa (200 OK):
-     {
-       "success": true,
-       "details": [
-         { "id": 2, "nombre": "Pedro", "email": "p@p.com", "rol": "LAVADOR", "activo": true },
-         ...
-       ]
-     }
-
-   POST /users
-   - Descripción: Crea un nuevo empleado.
-   - Seguridad: Solo ADMIN.
-   - Body Requerido:
-     {
-       "nombre": "Juan Perez",
-       "email": "juan@lavautos.com",
-       "password": "ClaveSegura123*",
-       "rol": "CAJERO" // Valores: ADMIN, CAJERO, SUPERVISOR, LAVADOR
-     }
-   - Respuesta Exitosa (201 Created): Retorna el objeto del usuario creado (sin el password).
-   - Errores posibles:
-     - 409: "User already exists" (El email ya está registrado).
-     - 400: "Invalid format" (Error en validación de campos).
-
-4. ESTRUCTURA DE ERROR ESTÁNDAR
---------------------------------------------------
-Cuando algo sale mal, el frontend siempre recibirá:
+1. MÓDULO: AUTENTICACIÓN (/auth)
+-----------------------------------------------------
+POST /auth/login
+- Descripción: Acceso al sistema.
+- Body (Postman):
 {
-  "success": false,
-  "code": "ERROR_CODE",
-  "message": "Descripción amigable del error para el usuario"
+  "username": "admin@lavautos.com",
+  "password": "Admin123*"
 }
 
-5. TIP PARA EL FRONTEND (MANEJO DE ROLES)
---------------------------------------------------
-El campo "rol" devuelto en el login debe usarse para persistir el estado de la aplicación y mostrar/ocultar opciones del menú:
-- ADMIN: Acceso total.
-- CAJERO: Registro de vehículos y cobros.
-- LAVADOR: Solo ver sus órdenes asignadas.
+2. MÓDULO: USUARIOS (/users)
+-----------------------------------------------------
+Permisos: Solo ADMIN
+
+GET /
+- Lista empleados (excluye al emisor).
+
+POST /
+- Crea nuevo empleado.
+- Body (Postman):
+{
+  "nombre": "Pedro Pérez",
+  "username": "pperez",
+  "password": "Password123*",
+  "rol": "CAJERO"
+}
+
+PATCH /:id
+- Actualización parcial de datos.
+- Body (Postman):
+{
+  "nombre": "Pedro Pérez Actualizado",
+  "activo": true
+}
+
+DELETE /:id -> Desactivación lógica.
+PATCH /restore/:id -> Reactivación lógica.
+
+3. MÓDULO: CLIENTES (/clients)
+-----------------------------------------------------
+Permisos: ADMIN, CAJERO (Delete/Restore solo ADMIN)
+
+GET /search/:cedula
+- Búsqueda rápida por documento de identidad.
+
+POST /
+- Registra un nuevo cliente.
+- Body (Postman):
+{
+  "cedula": "V-25123456",
+  "nombre": "Maria Garcia",
+  "telefono": "0412-5556677",
+  "email": "mgarcia@gmail.com"
+}
+
+PATCH /:id
+- Actualiza datos (Cédula inmutable).
+- Body (Postman):
+{
+  "telefono": "0424-9998877",
+  "email": "nuevo_correo@gmail.com"
+}
+
+4. MÓDULO: SERVICIOS (/services)
+-----------------------------------------------------
+Permisos: Lectura (Todos) / Escritura (ADMIN)
+
+GET /
+- Lista catálogo activo.
+
+POST /
+- Crea servicio o combo.
+- Body (Postman):
+{
+  "nombre": "Lavado Full SUV",
+  "precio": 35.00,
+  "descripcion": "Incluye motor y cera",
+  "duracionMinutos": 45,
+  "esCombo": false,
+  "tipoVehiculo": "SUV"
+}
+
+PUT /:id
+- Actualización completa.
+- Body (Postman):
+{
+  "nombre": "Lavado Full SUV Premium",
+  "precio": 40.00,
+  "descripcion": "Actualizado con pulitura",
+  "duracionMinutos": 60,
+  "esCombo": false,
+  "tipoVehiculo": "SUV"
+}
+
+5. MÓDULO: PROVEEDORES (/providers)
+-----------------------------------------------------
+Permisos: Solo ADMIN
+
+POST /
+- Registra proveedor.
+- Body (Postman):
+{
+  "rif": "J-301234567",
+  "nombre": "Distribuidora Químicos Lara",
+  "telefono": "0251-4445566",
+  "email": "ventas@quimicoslara.com"
+}
+
+PATCH /:id
+- Actualización de datos.
+- Body (Postman):
+{
+  "nombre": "Químicos Lara C.A.",
+  "activo": false
+}
+
+=====================================================
+TABLA DE ERRORES (CÓDIGOS PARA FRONTEND)
+=====================================================
+- USERNAME_ALREADY_EXISTS: El usuario ya está en uso.
+- CEDULA_ALREADY_EXISTS: La cédula ya está registrada.
+- NOMBRE_ALREADY_EXISTS: El servicio ya existe.
+- USER_INACTIVE: El usuario no tiene permiso de acceso.
+- CANNOT_DELETE_SELF: Intentaste desactivar tu propia cuenta.
+=====================================================
