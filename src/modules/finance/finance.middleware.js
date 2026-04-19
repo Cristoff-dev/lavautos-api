@@ -64,29 +64,20 @@ const validarFechas = (req, res, next) => {
     const { fechaInicio, fechaFin } = req.query;
     let errors = [];
 
-    if (!fechaInicio) {
-        errors.push('La fecha de inicio es requerida.');
-    }
-    if (!fechaFin) {
-        errors.push('La fecha de fin es requerida.');
-    }
-
-    if (fechaInicio && fechaFin) {
+    // Solo validamos el FORMATO si el usuario decidió enviarlas
+    if (fechaInicio) {
         const inicio = new Date(fechaInicio);
-        const fin = new Date(fechaFin);
+        if (isNaN(inicio.getTime())) errors.push('La fecha de inicio no es válida.');
+    }
 
-        if (isNaN(inicio.getTime())) {
-            errors.push('La fecha de inicio no es válida.');
-        }
-        if (isNaN(fin.getTime())) {
-            errors.push('La fecha de fin no es válida.');
-        }
-        if (inicio > fin) {
-            errors.push('La fecha de inicio no puede ser posterior a la fecha de fin.');
-        }
+    if (fechaFin) {
+        const fin = new Date(fechaFin);
+        if (isNaN(fin.getTime())) errors.push('La fecha de fin no es válida.');
     }
 
     if (errors.length > 0) return response.BadRequest(res, errors);
+    
+    // Si no vienen, simplemente pasamos al controlador
     next();
 };
 

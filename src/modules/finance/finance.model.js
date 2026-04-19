@@ -91,15 +91,33 @@ class ModelFinance {
 
     getHistorialTransacciones = async (fechaInicio, fechaFin, categoria = null) => {
         try {
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+
+            // Verificación de seguridad: Si la fecha es inválida, lanzamos error controlado
+            if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) {
+                throw new Error("Invalid Date");
+            }
+
             const where = {
-                fecha: { gte: new Date(fechaInicio), lte: new Date(fechaFin) }
+                fecha: {
+                    gte: inicio,
+                    lte: fin
+                }
             };
-            if (categoria) where.categoria = categoria;
+
+            if (categoria) {
+                where.categoria = categoria;
+            }
 
             return await prisma.transaccionContable.findMany({
                 where,
                 orderBy: { fecha: 'desc' },
-                include: { vehiculo: true, compra: true, gasto: true }
+                include: { 
+                    vehiculo: { select: { placa: true, marca: true, modelo: true } },
+                    compra: { select: { id: true, total: true } },
+                    gasto: { select: { id: true, concepto: true } }
+                }
             });
         } catch (error) { throw error; }
     }

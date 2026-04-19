@@ -104,11 +104,18 @@ class ControllerFinance {
     // Obtener historial por período
     getHistorialTransacciones = async (req, res) => {
         try {
-            const { fechaInicio, fechaFin, categoria } = req.query;
-            const result = await service.getHistorialTransacciones(fechaInicio, fechaFin, categoria);
-            return response.QuerySuccess(res, result);
+        let { fechaInicio, fechaFin, categoria } = req.query;
+
+        if (!fechaInicio || !fechaFin) {
+            const hoy = new Date();
+            fechaInicio = new Date(hoy.setHours(0, 0, 0, 0)).toISOString();
+            fechaFin = new Date(hoy.setHours(23, 59, 59, 999)).toISOString();
+        }
+
+        const result = await service.getHistorialTransacciones(fechaInicio, fechaFin, categoria);
+        return response.QuerySuccess(res, result);
         } catch (error) {
-            return response.ErrorInternal(res, error.message);
+        return response.ErrorInternal(res, error.message);
         }
     }
 
@@ -125,14 +132,25 @@ class ControllerFinance {
     // Calcular balance por período
     calcularBalancePorPeriodo = async (req, res) => {
         try {
-            const { fechaInicio, fechaFin } = req.query;
-            if (!fechaInicio || !fechaFin) {
-                return response.BadRequest(res, "Se requieren fechaInicio y fechaFin.");
-            }
-            const result = await service.calcularBalancePorPeriodo(fechaInicio, fechaFin);
-            return response.QuerySuccess(res, result);
+        let { fechaInicio, fechaFin } = req.query;
+
+        // Lógica de "Hoy por defecto"
+        if (!fechaInicio || !fechaFin) {
+            const hoy = new Date();
+            
+            // Inicio del día: 2026-04-19T00:00:00
+            const inicio = new Date(hoy.setHours(0, 0, 0, 0)).toISOString();
+            // Fin del día: 2026-04-19T23:59:59
+            const fin = new Date(hoy.setHours(23, 59, 59, 999)).toISOString();
+            
+            fechaInicio = inicio;
+            fechaFin = fin;
+        }
+
+        const result = await service.calcularBalancePorPeriodo(fechaInicio, fechaFin);
+        return response.QuerySuccess(res, result);
         } catch (error) {
-            return response.ErrorInternal(res, error.message);
+        return response.ErrorInternal(res, error.message);
         }
     }
 }
