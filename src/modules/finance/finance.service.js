@@ -44,16 +44,19 @@ class ServiceFinance {
         } catch (error) { throw error; }
     }
 
+    // Utilidad interna para definir tipo
+    _esIngreso(categoria) {
+        return ['INGRESO_LAVADO', 'OTRO_INGRESO'].includes(categoria);
+    }
+
     // Obtener todas las transacciones
     obtenerTransacciones = async () => {
         try {
             const transacciones = await model.findAll();
-
-            // Agregar información adicional para cada transacción
-            return transacciones.map(transaccion => ({
-                ...transaccion,
-                tipo: transaccion.monto > 0 ? 'INGRESO' : 'EGRESO',
-                montoAbsoluto: Math.abs(transaccion.monto)
+            return transacciones.map(t => ({
+                ...t,
+                tipo: this._esIngreso(t.categoria) ? 'INGRESO' : 'EGRESO',
+                montoAbsoluto: t.monto // Ya es positivo de por sí
             }));
         } catch (error) { throw error; }
     }
@@ -66,8 +69,8 @@ class ServiceFinance {
 
             return {
                 ...transaccion,
-                tipo: transaccion.monto > 0 ? 'INGRESO' : 'EGRESO',
-                montoAbsoluto: Math.abs(transaccion.monto)
+                tipo: this._esIngreso(transaccion.categoria) ? 'INGRESO' : 'EGRESO',
+                montoAbsoluto: transaccion.monto
             };
         } catch (error) { throw error; }
     }
@@ -150,13 +153,16 @@ class ServiceFinance {
         try {
             const transacciones = await model.getHistorialTransacciones(fechaInicio, fechaFin);
 
-            const ingresos = transacciones
-                .filter(t => t.monto > 0)
-                .reduce((sum, t) => sum + t.monto, 0);
+            let ingresos = 0;
+            let egresos = 0;
 
-            const egresos = Math.abs(transacciones
-                .filter(t => t.monto < 0)
-                .reduce((sum, t) => sum + t.monto, 0));
+            transacciones.forEach(t => {
+                if (this._esIngreso(t.categoria)) {
+                    ingresos += t.monto;
+                } else {
+                    egresos += t.monto;
+                }
+            });
 
             return {
                 periodo: { inicio: fechaInicio, fin: fechaFin },

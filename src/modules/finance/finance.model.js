@@ -1,191 +1,58 @@
 import prisma from '../../shared/prisma/client.js';
 
 class ModelFinance {
-    // Crear una nueva transacción contable
     create = async (data) => {
         try {
             return await prisma.transaccionContable.create({
                 data,
-                select: {
-                    id: true,
-                    categoria: true,
-                    monto: true,
-                    descripcion: true,
-                    fecha: true,
-                    vehiculoId: true,
-                    compraId: true,
-                    gastoId: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    vehiculo: {
-                        select: {
-                            id: true,
-                            placa: true,
-                            marca: true,
-                            modelo: true
-                        }
-                    },
-                    compra: {
-                        select: {
-                            id: true,
-                            fecha: true,
-                            total: true,
-                            proveedor: {
-                                select: {
-                                    nombre: true
-                                }
-                            }
-                        }
-                    },
-                    gasto: {
-                        select: {
-                            id: true,
-                            fecha: true,
-                            monto: true,
-                            descripcion: true
-                        }
-                    }
-                }
+                include: { vehiculo: true, compra: true, gasto: true } // Más limpio y seguro
             });
         } catch (error) { throw error; }
     }
 
-    // Obtener todas las transacciones
     findAll = async () => {
         try {
             return await prisma.transaccionContable.findMany({
                 orderBy: { fecha: 'desc' },
-                select: {
-                    id: true,
-                    categoria: true,
-                    monto: true,
-                    descripcion: true,
-                    fecha: true,
-                    vehiculoId: true,
-                    compraId: true,
-                    gastoId: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    vehiculo: {
-                        select: {
-                            id: true,
-                            placa: true,
-                            marca: true,
-                            modelo: true
-                        }
-                    },
-                    compra: {
-                        select: {
-                            id: true,
-                            fecha: true,
-                            total: true,
-                            proveedor: {
-                                select: {
-                                    nombre: true
-                                }
-                            }
-                        }
-                    },
-                    gasto: {
-                        select: {
-                            id: true,
-                            fecha: true,
-                            monto: true,
-                            descripcion: true
-                        }
-                    }
+                include: { 
+                    vehiculo: { select: { placa: true, marca: true, modelo: true } },
+                    compra: { select: { id: true, total: true, proveedor: { select: { nombre: true } } } },
+                    gasto: { select: { id: true, monto: true, concepto: true } }
                 }
             });
         } catch (error) { throw error; }
     }
 
-    // Obtener transacción por ID
     findById = async (id) => {
         try {
             return await prisma.transaccionContable.findUnique({
                 where: { id },
-                select: {
-                    id: true,
-                    categoria: true,
-                    monto: true,
-                    descripcion: true,
-                    fecha: true,
-                    vehiculoId: true,
-                    compraId: true,
-                    gastoId: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    vehiculo: {
-                        select: {
-                            id: true,
-                            placa: true,
-                            marca: true,
-                            modelo: true
-                        }
-                    },
-                    compra: {
-                        select: {
-                            id: true,
-                            fecha: true,
-                            total: true,
-                            proveedor: {
-                                select: {
-                                    nombre: true
-                                }
-                            }
-                        }
-                    },
-                    gasto: {
-                        select: {
-                            id: true,
-                            fecha: true,
-                            monto: true,
-                            descripcion: true
-                        }
-                    }
+                include: { 
+                    vehiculo: { select: { placa: true, marca: true, modelo: true } },
+                    compra: { select: { id: true, total: true, proveedor: { select: { nombre: true } } } },
+                    gasto: { select: { id: true, monto: true, concepto: true } }
                 }
             });
         } catch (error) { throw error; }
     }
 
-    // Actualizar transacción
     update = async (id, data) => {
         try {
             return await prisma.transaccionContable.update({
                 where: { id },
-                data,
-                select: {
-                    id: true,
-                    categoria: true,
-                    monto: true,
-                    descripcion: true,
-                    fecha: true,
-                    vehiculoId: true,
-                    compraId: true,
-                    gastoId: true,
-                    createdAt: true,
-                    updatedAt: true
-                }
+                data
             });
         } catch (error) { throw error; }
     }
 
-    // Eliminar transacción
     delete = async (id) => {
         try {
             return await prisma.transaccionContable.delete({
-                where: { id },
-                select: {
-                    id: true,
-                    categoria: true,
-                    monto: true,
-                    descripcion: true
-                }
+                where: { id }
             });
         } catch (error) { throw error; }
     }
 
-    // Obtener total por categoría
     getTotalByCategoria = async (categoria) => {
         try {
             const result = await prisma.transaccionContable.aggregate({
@@ -196,91 +63,43 @@ class ModelFinance {
         } catch (error) { throw error; }
     }
 
-    // Obtener resumen financiero para dashboard
     getResumenFinanciero = async () => {
         try {
             const [
-                ingresosLavado,
-                gastosOperativos,
-                comprasInsumos,
-                otrosIngresos,
-                otrosEgresos
+                ingresosLavado, gastosOperativos, comprasInsumos, otrosIngresos, otrosEgresos, pagoComision
             ] = await Promise.all([
                 this.getTotalByCategoria('INGRESO_LAVADO'),
                 this.getTotalByCategoria('GASTO_OPERATIVO'),
                 this.getTotalByCategoria('COMPRA_INSUMO'),
                 this.getTotalByCategoria('OTRO_INGRESO'),
-                this.getTotalByCategoria('OTRO_EGRESO')
+                this.getTotalByCategoria('OTRO_EGRESO'),
+                this.getTotalByCategoria('PAGO_COMISION') // Faltaba evaluar comisiones
             ]);
 
             const totalIngresos = ingresosLavado + otrosIngresos;
-            const totalEgresos = gastosOperativos + comprasInsumos + otrosEgresos;
+            const totalEgresos = gastosOperativos + comprasInsumos + otrosEgresos + pagoComision;
             const balance = totalIngresos - totalEgresos;
 
             return {
-                ingresos: {
-                    lavados: ingresosLavado,
-                    otros: otrosIngresos,
-                    total: totalIngresos
-                },
-                egresos: {
-                    operativos: gastosOperativos,
-                    insumos: comprasInsumos,
-                    otros: otrosEgresos,
-                    total: totalEgresos
-                },
+                ingresos: { lavados: ingresosLavado, otros: otrosIngresos, total: totalIngresos },
+                egresos: { operativos: gastosOperativos, insumos: comprasInsumos, comisiones: pagoComision, otros: otrosEgresos, total: totalEgresos },
                 balance,
-                rentabilidad: totalIngresos > 0 ? Math.round((balance / totalIngresos) * 100) : 0
+                rentabilidad: totalIngresos > 0 ? Number(((balance / totalIngresos) * 100).toFixed(2)) : 0
             };
         } catch (error) { throw error; }
     }
 
-    // Obtener historial de transacciones por período
     getHistorialTransacciones = async (fechaInicio, fechaFin, categoria = null) => {
         try {
             const where = {
-                fecha: {
-                    gte: new Date(fechaInicio),
-                    lte: new Date(fechaFin)
-                }
+                fecha: { gte: new Date(fechaInicio), lte: new Date(fechaFin) }
             };
-
-            if (categoria) {
-                where.categoria = categoria;
-            }
+            if (categoria) where.categoria = categoria;
 
             return await prisma.transaccionContable.findMany({
                 where,
                 orderBy: { fecha: 'desc' },
-                select: {
-                    id: true,
-                    categoria: true,
-                    monto: true,
-                    descripcion: true,
-                    fecha: true,
-                    vehiculo: {
-                        select: {
-                            placa: true,
-                            marca: true,
-                            modelo: true
-                        }
-                    },
-                    compra: {
-                        select: {
-                            id: true,
-                            proveedor: {
-                                select: {
-                                    nombre: true
-                                }
-                            }
-                        }
-                    },
-                    gasto: {
-                        select: {
-                            descripcion: true
-                        }
-                    }
-                }
+                include: { vehiculo: true, compra: true, gasto: true }
             });
         } catch (error) { throw error; }
     }

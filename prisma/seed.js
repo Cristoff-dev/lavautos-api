@@ -4,14 +4,18 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('🌱 Iniciando la carga de datos (Seed) con Finanzas...');
+    console.log('🌱 Iniciando la carga de datos (Seed) para el Sistema de Autolavado...');
 
-    // 1. CREAR ADMINISTRADOR INICIAL
+    // 1. LIMPIEZA DE DATOS (Opcional, para evitar duplicados en pruebas)
+    // Cuidado: Esto borra los datos actuales de estas tablas
+    await prisma.transaccionContable.deleteMany({});
+    console.log('🧹 Tablas contables limpiadas');
+
+    // 2. CREAR ADMINISTRADOR INICIAL
     const adminPassword = await bcrypt.hash('Admin123*', 10);
-
     const admin = await prisma.usuario.upsert({
-        where: { username: 'admin' }, // Ajustado a 'username' según tu schema
-        update: {},
+        where: { username: 'admin' },
+        update: { password: adminPassword },
         create: {
             username: 'admin',
             nombre: 'Administrador General',
@@ -22,103 +26,101 @@ async function main() {
     });
     console.log(`✅ Usuario Admin verificado: ${admin.username}`);
 
-    // 2. CREAR TIPOS DE SERVICIOS
-    const servicios = [
-        { nombre: 'Lavado Sencillo', precio: 10.0, esCombo: false },
-        { nombre: 'Lavado Premium', precio: 25.0, esCombo: false },
-        { nombre: 'Combo Limpieza Total', precio: 45.0, esCombo: true },
-    ];
-
-    for (const s of servicios) {
-        await prisma.servicio.upsert({
-            where: { nombre: s.nombre },
-            update: { precio: s.precio },
-            create: s,
-        });
-    }
-    console.log('✅ Catálogo de servicios inicializado');
-
-    // 3. CREAR UN CLIENTE Y VEHÍCULO PARA PRUEBAS CONTABLES
+    // 3. CREAR VEHÍCULO DE PRUEBA (Necesario para relaciones de ingreso)
+    // Primero necesitamos un cliente y un tipo de vehículo
     const cliente = await prisma.cliente.upsert({
-        where: { cedula: 'V-20123456' },
+        where: { cedula: 'V-12345678' },
         update: {},
         create: {
-            cedula: 'V-20123456',
-            nombre: 'Carlos Rodriguez',
-            telefono: '0414-1234567',
-            propiedades: {
-                create: {
-                    placa: 'AE123BB',
-                    marca: 'Toyota',
-                    modelo: 'Corolla',
-                    color: 'Blanco',
-                    clase: 'SEDAN'
-                }
-            }
-        },
-        include: { propiedades: true }
-    });
-
-    const adnId = cliente.propiedades[0].id;
-
-    // 4. CREAR UNA OPERACIÓN DE LAVADO (VEHICULO)
-    const vehiculoOperacion = await prisma.vehiculo.create({
-        data: {
-            tipoVehiculoId: adnId,
-            conductorId: cliente.id,
-            estado: 'ENTREGADO_Y_PAGADO',
-            montoTotal: 25.0,
-            comisionLavador: 6.25, // 25% automático
+            cedula: 'V-12345678',
+            nombre: 'Juan Pérez',
+            telefono: '0412-5555555',
         }
     });
 
-    // 5. SEMBRAR TRANSACCIONES CONTABLES (Módulo FINANCE)
-    // Borramos transacciones previas para evitar basura en pruebas de balance
-    await prisma.transaccionContable.deleteMany({});
+    const tipoVehiculo = await prisma.tipoVehiculo.upsert({
+        where: { id: 1 }, // Asumiendo ID 1 para Sedan
+        update: {},
+        create: {
+            nombre: 'Sedan',
+            descripcion: 'Vehículo particular estándar',
+            propietarioId: cliente.id
+        }
+    });
 
+    const vehiculo = await prisma.vehiculo.create({
+        data: {
+            placa: 'ABC123DEF',
+            marca: 'Toyota',
+            modelo: 'Corolla',
+            color: 'Blanco',
+            tipoId: tipoVehiculo.id,
+            conductorId: cliente.id,
+            estado: 'LISTO'
+        }
+    });
+
+    // 4. MOVIMIENTOS CONTABLES (Alineados con el nuevo esquema y lógica)
+    console.log('📊 Generando movimientos contables...');
+    
     await prisma.transaccionContable.createMany({
         data: [
+            // INGRESOS
+            { 
+                categoria: 'INGRESO_LAVADO', 
+                monto: 15.0, 
+                descripcion: `Lavado Sencillo - Placa ${vehiculo.placa}`,
+                vehiculoId: vehiculo.id,
+                fecha: new Date('2026-04-10T10:00:00Z')
+            },
             { 
                 categoria: 'INGRESO_LAVADO', 
                 monto: 25.0, 
-                descripcion: `Cobro Lavado Placa ${cliente.propiedades[0].placa}`,
-                vehiculoId: vehiculoOperacion.id 
+                descripcion: `Lavado Premium - Placa ${vehiculo.placa}`,
+                vehiculoId: vehiculo.id,
+                fecha: new Date('2026-04-11T14:30:00Z')
             },
             { 
+                categoria: 'OTRO_INGRESO', 
+                monto: 5.0, 
+                descripcion: "Venta de ambientador de pino",
+                fecha: new Date('2026-04-12T09:15:00Z')
+            },
+
+            // EGRESOS (Todos con montos positivos, la categoría define que resta)
+            { 
                 categoria: 'GASTO_OPERATIVO', 
-                monto: 15.0, 
-                descripcion: "Pago de servicios (Electricidad)" 
+                monto: 40.0, 
+                descripcion: "Pago de servicio de agua (Mes Abril)",
+                fecha: new Date('2026-04-12T11:00:00Z')
             },
             { 
                 categoria: 'COMPRA_INSUMO', 
-                monto: 30.0, 
-                descripcion: "Compra de 5L de Champú Activo" 
+                monto: 60.0, 
+                descripcion: "Compra de 10L de Jabón pH Neutro",
+                fecha: new Date('2026-04-13T16:00:00Z')
+            },
+            { 
+                categoria: 'PAGO_COMISION', 
+                monto: 10.0, 
+                descripcion: "Comisión lavado operario #4",
+                fecha: new Date('2026-04-13T18:00:00Z')
+            },
+            { 
+                categoria: 'OTRO_EGRESO', 
+                monto: 12.5, 
+                descripcion: "Reparación menor manguera de presión",
+                fecha: new Date('2026-04-14T08:30:00Z')
             }
         ]
     });
-    console.log('✅ Movimientos contables de prueba generados');
 
-    // 6. CREAR INSUMOS CRÍTICOS
-    const insumos = [
-        { nombre: 'Champú Activo', stockActual: 100.0, stockMinimo: 20.0 },
-        { nombre: 'Desengrasante', stockActual: 50.0, stockMinimo: 10.0 },
-        { nombre: 'Silicona de Gomas', stockActual: 30.0, stockMinimo: 5.0 },
-    ];
-
-    for (const i of insumos) {
-        await prisma.insumo.upsert({
-            where: { nombre: i.nombre },
-            update: {},
-            create: i,
-        });
-    }
-    console.log('✅ Inventario de insumos cargado');
-    console.log('🚀 Base de datos lista con historial contable.');
+    console.log('✅ Base de datos poblada con éxito');
 }
 
 main()
     .catch((e) => {
-        console.error('❌ Error ejecutando el seed:', e);
+        console.error('❌ Error en el seed:', e);
         process.exit(1);
     })
     .finally(async () => {

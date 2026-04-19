@@ -32,7 +32,8 @@ const validarTransaccion = (req, res, next) => {
         'GASTO_OPERATIVO',
         'COMPRA_INSUMO',
         'OTRO_INGRESO',
-        'OTRO_EGRESO'
+        'OTRO_EGRESO',
+        'PAGO_COMISION'
     ];
     if (categoria && !categoriasValidas.includes(categoria)) {
         errors.push('Categoría inválida.');
