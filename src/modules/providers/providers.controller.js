@@ -1,5 +1,6 @@
 import response from '../../shared/utils/responses.js';
 import ServiceProviders from './providers.service.js';
+import { generarPdfProveedores } from '../../services/reporteProveedores.js';
 
 const service = new ServiceProviders();
 
@@ -57,6 +58,21 @@ class ControllerProviders {
             return response.ErrorInternal(res, error.message);
         }
     }
+
+    exportarReporteProveedores = async (req, res) => {
+        try {
+            const data = await service.getProviders();
+            const buffer = await generarPdfProveedores(data);
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': 'inline; filename="Reporte_Proveedores.pdf"',
+                'Content-Length': buffer.length
+            });
+            return res.send(buffer);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
 }
 
 export const {
@@ -64,5 +80,6 @@ export const {
     obtenerProveedores,
     obtenerProveedor,
     actualizarProveedor,
-    eliminarProveedor
+    eliminarProveedor,
+    exportarReporteProveedores
 } = new ControllerProviders();

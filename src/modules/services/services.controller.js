@@ -1,5 +1,6 @@
 import response from '../../shared/utils/responses.js';
 import ServiceServices from './services.service.js';
+import { generarPdfServicios } from '../../services/reporteServicios.js';
 
 const service = new ServiceServices();
 
@@ -57,6 +58,21 @@ class ControllerServices {
             return response.ErrorInternal(res, error.message);
         }
     }
+
+    exportarReporteServicios = async (req, res) => {
+        try {
+            const data = await service.getServices();
+            const buffer = await generarPdfServicios(data);
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': 'inline; filename="Reporte_Servicios.pdf"',
+                'Content-Length': buffer.length
+            });
+            return res.send(buffer);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
 }
 
 export const {
@@ -64,5 +80,6 @@ export const {
     obtenerServicios,
     obtenerServicio,
     actualizarServicio,
-    eliminarServicio
+    eliminarServicio,
+    exportarReporteServicios
 } = new ControllerServices();
