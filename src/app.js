@@ -54,7 +54,7 @@ const urlApiBase = '/api/lavautos';
 app.use(`${urlApiBase}/auth`, authRoute);
 app.use(`${urlApiBase}/users`, usersRoute);
 app.use(`${urlApiBase}/clients`, clientsRoute);
-app.use(`${urlApiBase}/type-vehicles`, typeVehiclesRoute);
+app.use(`${urlApiBase}/type-vehicles`, typeVehiclesRoute); // Esta es la que probamos
 app.use(`${urlApiBase}/vehicles`, vehiclesRoute);
 app.use(`${urlApiBase}/providers`, providersRoute);
 app.use(`${urlApiBase}/purchases`, purchasesRoute);
@@ -62,5 +62,6 @@ app.use(`${urlApiBase}/expenses`, expensesRoute);
 app.use(`${urlApiBase}/services`, servicesRoute);
 app.use(`${urlApiBase}/inventory`, inventoryRoute);
 app.use(`${urlApiBase}/finance`, financeRoute);
+app.use(`${urlApiBase}/orders`, ordersRoute);
 
 export default app;
