@@ -66,6 +66,11 @@ router.patch('/stock/:id',
     controller.updateStock
 );
 
+router.get('/reportes/pdf', 
+    authorization(['ADMIN', 'SUPERVISOR']), 
+    controller.generateReportPdf
+);
+
 // ============================================
 // RUTAS DE ADMINISTRACIÓN (Solo ADMIN)
 // ============================================

@@ -1,4 +1,5 @@
 import ModelInventory from './inventory.model.js';
+import { generarPdfInventario } from '../../services/reporteInventario.js';
 
 const model = new ModelInventory();
 
@@ -276,6 +277,19 @@ class ServiceInventory {
             };
         } catch (error) { throw error; }
     }
+
+    generarReportePdf = async () => {
+        try {
+            // Reutilizamos tus métodos existentes para obtener la data
+            const insumos = await this.getInsumos();
+            const resumen = await this.getResumenInventario();
+            
+            // Pasamos la data a Puppeteer
+            const pdfBuffer = await generarPdfInventario(insumos, resumen);
+            return pdfBuffer;
+        } catch (error) { throw error; }
+    }
+
 }
 
 export default ServiceInventory;

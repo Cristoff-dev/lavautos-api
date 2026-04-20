@@ -174,6 +174,23 @@ class ControllerInventory {
             return response.ErrorInternal(res, error.message);
         }
     }
+
+    generateReportPdf = async (req, res) => {
+        try {
+            const pdfBuffer = await service.generarReportePdf();
+            
+            // Configuramos los headers para que el navegador entienda que es un PDF
+            res.setHeader('Content-Type', 'application/pdf');
+            // Cambia 'attachment' por 'inline' si prefieres que se abra en el navegador en vez de descargarse directo
+            res.setHeader('Content-Disposition', 'attachment; filename="reporte_inventario.pdf"'); 
+            res.setHeader('Content-Length', pdfBuffer.length);
+            
+            return res.status(200).send(pdfBuffer);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
 }
 
 export default ControllerInventory;

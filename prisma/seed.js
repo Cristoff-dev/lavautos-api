@@ -4,118 +4,261 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('🌱 Iniciando la carga de datos (Seed) para el Sistema de Autolavado...');
+    console.log('🌱 Iniciando la carga masiva de 20 registros por tabla...');
 
-    // 1. LIMPIEZA DE DATOS (Opcional, para evitar duplicados en pruebas)
-    // Cuidado: Esto borra los datos actuales de estas tablas
-    await prisma.transaccionContable.deleteMany({});
-    console.log('🧹 Tablas contables limpiadas');
+    // ==========================================
+    // 0. LIMPIEZA DE TABLAS (Orden estricto por FK)
+    // ==========================================
+    console.log('🧹 Limpiando base de datos...');
+    await prisma.detalleCompra.deleteMany();
+    await prisma.servicioInsumo.deleteMany();
+    await prisma.detalleServicio.deleteMany();
+    await prisma.compra.deleteMany();
+    await prisma.gastoOperativo.deleteMany();
+    await prisma.transaccionContable.deleteMany();
+    await prisma.vehiculo.deleteMany();
+    await prisma.tipoVehiculo.deleteMany();
+    await prisma.insumo.deleteMany();
+    await prisma.servicio.deleteMany();
+    await prisma.proveedor.deleteMany();
+    await prisma.cliente.deleteMany();
+    await prisma.usuario.deleteMany();
+    await prisma.service.deleteMany();
+    await prisma.provider.deleteMany();
 
-    // 2. CREAR ADMINISTRADOR INICIAL
-    const adminPassword = await bcrypt.hash('Admin123*', 10);
-    const admin = await prisma.usuario.upsert({
-        where: { username: 'admin' },
-        update: { password: adminPassword },
-        create: {
-            username: 'admin',
-            nombre: 'Administrador General',
-            password: adminPassword,
-            rol: 'ADMIN',
-            activo: true,
-        },
-    });
-    console.log(`✅ Usuario Admin verificado: ${admin.username}`);
+    // Nombres para darle realismo a los datos
+    const nombresPersonas = [
+        'Keiber', 'Aarón', 'Angel', 'Anthony', 'Hendelber', 
+        'José', 'Luis', 'Mariana', 'Stefany', 'Carlos', 
+        'María', 'Pedro', 'Ana', 'Carmen', 'Jorge', 
+        'Rosa', 'Miguel', 'Elena', 'David', 'Laura'
+    ];
 
-    // 3. CREAR VEHÍCULO DE PRUEBA (Necesario para relaciones de ingreso)
-    // Primero necesitamos un cliente y un tipo de vehículo
-    const cliente = await prisma.cliente.upsert({
-        where: { cedula: 'V-12345678' },
-        update: {},
-        create: {
-            cedula: 'V-12345678',
-            nombre: 'Juan Pérez',
-            telefono: '0412-5555555',
-        }
-    });
+    // ==========================================
+    // 1. USUARIOS
+    // ==========================================
+    console.log('👤 Creando 20 Usuarios...');
+    const passwordHash = await bcrypt.hash('admin123', 10);
+    const usuarios = [];
+    for (let i = 0; i < 20; i++) {
+        let rolAsignado = 'LAVADOR';
+        if (i === 0) rolAsignado = 'ADMIN';
+        else if (i < 5) rolAsignado = 'CAJERO';
+        else if (i < 10) rolAsignado = 'SUPERVISOR';
 
-    const tipoVehiculo = await prisma.tipoVehiculo.upsert({
-        where: { id: 1 }, // Asumiendo ID 1 para Sedan
-        update: {},
-        create: {
-            nombre: 'Sedan',
-            descripcion: 'Vehículo particular estándar',
-            propietarioId: cliente.id
-        }
-    });
-
-    const vehiculo = await prisma.vehiculo.create({
-        data: {
-            placa: 'ABC123DEF',
-            marca: 'Toyota',
-            modelo: 'Corolla',
-            color: 'Blanco',
-            tipoId: tipoVehiculo.id,
-            conductorId: cliente.id,
-            estado: 'LISTO'
-        }
-    });
-
-    // 4. MOVIMIENTOS CONTABLES (Alineados con el nuevo esquema y lógica)
-    console.log('📊 Generando movimientos contables...');
-    
-    await prisma.transaccionContable.createMany({
-        data: [
-            // INGRESOS
-            { 
-                categoria: 'INGRESO_LAVADO', 
-                monto: 15.0, 
-                descripcion: `Lavado Sencillo - Placa ${vehiculo.placa}`,
-                vehiculoId: vehiculo.id,
-                fecha: new Date('2026-04-10T10:00:00Z')
-            },
-            { 
-                categoria: 'INGRESO_LAVADO', 
-                monto: 25.0, 
-                descripcion: `Lavado Premium - Placa ${vehiculo.placa}`,
-                vehiculoId: vehiculo.id,
-                fecha: new Date('2026-04-11T14:30:00Z')
-            },
-            { 
-                categoria: 'OTRO_INGRESO', 
-                monto: 5.0, 
-                descripcion: "Venta de ambientador de pino",
-                fecha: new Date('2026-04-12T09:15:00Z')
-            },
-
-            // EGRESOS (Todos con montos positivos, la categoría define que resta)
-            { 
-                categoria: 'GASTO_OPERATIVO', 
-                monto: 40.0, 
-                descripcion: "Pago de servicio de agua (Mes Abril)",
-                fecha: new Date('2026-04-12T11:00:00Z')
-            },
-            { 
-                categoria: 'COMPRA_INSUMO', 
-                monto: 60.0, 
-                descripcion: "Compra de 10L de Jabón pH Neutro",
-                fecha: new Date('2026-04-13T16:00:00Z')
-            },
-            { 
-                categoria: 'PAGO_COMISION', 
-                monto: 10.0, 
-                descripcion: "Comisión lavado operario #4",
-                fecha: new Date('2026-04-13T18:00:00Z')
-            },
-            { 
-                categoria: 'OTRO_EGRESO', 
-                monto: 12.5, 
-                descripcion: "Reparación menor manguera de presión",
-                fecha: new Date('2026-04-14T08:30:00Z')
+        usuarios.push(await prisma.usuario.create({
+            data: {
+                nombre: nombresPersonas[i],
+                username: `user${i + 1}`,
+                password: passwordHash,
+                rol: rolAsignado,
+                activo: true,
             }
-        ]
-    });
+        }));
+    }
 
-    console.log('✅ Base de datos poblada con éxito');
+    // ==========================================
+    // 2. CLIENTES
+    // ==========================================
+    console.log('👥 Creando 20 Clientes...');
+    const clientes = [];
+    for (let i = 0; i < 20; i++) {
+        clientes.push(await prisma.cliente.create({
+            data: {
+                cedula: `V-${20000000 + i}`,
+                nombre: `${nombresPersonas[19 - i]} Apellido${i}`,
+                telefono: `0414-12345${i.toString().padStart(2, '0')}`,
+                email: `cliente${i + 1}@email.com`,
+                activo: true,
+            }
+        }));
+    }
+
+    // ==========================================
+    // 3. PROVEEDORES E INSUMOS
+    // ==========================================
+    console.log('📦 Creando 20 Proveedores y 20 Insumos...');
+    const proveedores = [];
+    const insumos = [];
+    for (let i = 0; i < 20; i++) {
+        proveedores.push(await prisma.proveedor.create({
+            data: {
+                rif: `J-${30000000 + i}`,
+                nombre: `Distribuidora ${i + 1} C.A.`,
+                telefono: `0251-55500${i.toString().padStart(2, '0')}`,
+                email: `contacto@distribuidora${i + 1}.com`,
+            }
+        }));
+
+        insumos.push(await prisma.insumo.create({
+            data: {
+                nombre: `Producto Químico ${i + 1}`,
+                stockActual: 100.0 + i,
+                stockMinimo: 10.0,
+            }
+        }));
+    }
+
+    // ==========================================
+    // 4. SERVICIOS (Y Pivote Servicio-Insumo)
+    // ==========================================
+    console.log('🚿 Creando 20 Servicios y sus recetas...');
+    const servicios = [];
+    for (let i = 0; i < 20; i++) {
+        const servicio = await prisma.servicio.create({
+            data: {
+                nombre: `Lavado Especial Tipo ${i + 1}`,
+                precio: 10.0 + (i * 2),
+                descripcion: `Descripción detallada del servicio ${i + 1}`,
+                duracionMinutos: 30 + i,
+                esCombo: i % 5 === 0,
+                tipoVehiculo: i % 2 === 0 ? 'SEDAN' : 'SUV',
+            }
+        });
+        servicios.push(servicio);
+
+        // Relación Pivote: Cada servicio usa 1 insumo
+        await prisma.servicioInsumo.create({
+            data: {
+                servicioId: servicio.id,
+                insumoId: insumos[i].id,
+                cantidad: 0.5 + (i * 0.1)
+            }
+        });
+    }
+
+    // ==========================================
+    // 5. VEHÍCULOS (Ficha y Operación)
+    // ==========================================
+    console.log('🚗 Creando 20 Tipos de Vehículo y 20 Vehículos en cola...');
+    const tiposVehiculo = [];
+    const vehiculos = [];
+    
+    // Filtrar un lavador disponible para asignar
+    const lavadores = usuarios.filter(u => u.rol === 'LAVADOR');
+
+    for (let i = 0; i < 20; i++) {
+        // Ficha Técnica (ADN)
+        const tipoV = await prisma.tipoVehiculo.create({
+            data: {
+                placa: `ABC-${100 + i}`,
+                marca: i % 2 === 0 ? 'Toyota' : 'Chevrolet',
+                modelo: `Modelo ${i + 1}`,
+                color: 'Negro',
+                clase: i % 2 === 0 ? 'Sedan' : 'SUV',
+                clienteId: clientes[i].id
+            }
+        });
+        tiposVehiculo.push(tipoV);
+
+        // Operación actual
+        const vehiculo = await prisma.vehiculo.create({
+            data: {
+                placa: `OP-${tipoV.placa}`, // Placa única de operación
+                marca: tipoV.marca,
+                modelo: tipoV.modelo,
+                estado: i % 3 === 0 ? 'LISTO' : 'EN_ESPERA',
+                tipoVehiculoId: tipoV.id,
+                conductorId: clientes[i].id,
+                lavadorId: lavadores[i % lavadores.length].id,
+                montoTotal: servicios[i].precio,
+                comisionLavador: 5.0,
+            }
+        });
+        vehiculos.push(vehiculo);
+
+        // Relación Pivote: Detalle del Servicio realizado al vehículo
+        await prisma.detalleServicio.create({
+            data: {
+                vehiculoId: vehiculo.id,
+                servicioId: servicios[i].id,
+                precioFijo: servicios[i].precio
+            }
+        });
+    }
+
+    // ==========================================
+    // 6. CONTABILIDAD (Transacciones, Compras, Gastos)
+    // ==========================================
+    console.log('📊 Generando Movimientos Contables (Ingresos, Compras y Gastos)...');
+    for (let i = 0; i < 20; i++) {
+        // A. Crear 20 Ingresos por Lavado
+        await prisma.transaccionContable.create({
+            data: {
+                categoria: 'INGRESO_LAVADO',
+                monto: vehiculos[i].montoTotal,
+                descripcion: `Ingreso por lavado - ${vehiculos[i].placa}`,
+                vehiculoId: vehiculos[i].id,
+            }
+        });
+
+        // B. Crear 20 Compras y sus respectivas Transacciones
+        const transaccionCompra = await prisma.transaccionContable.create({
+            data: {
+                categoria: 'COMPRA_INSUMO',
+                monto: 50.0 + i,
+                descripcion: `Factura de compra #${1000 + i}`,
+            }
+        });
+        
+        const compra = await prisma.compra.create({
+            data: {
+                total: 50.0 + i,
+                proveedorId: proveedores[i].id,
+                transaccionId: transaccionCompra.id
+            }
+        });
+
+        // Detalle de esa compra
+        await prisma.detalleCompra.create({
+            data: {
+                compraId: compra.id,
+                insumoId: insumos[i].id,
+                cantidad: 10,
+                precioUnit: 5.0 + (i * 0.1)
+            }
+        });
+
+        // C. Crear 20 Gastos Operativos y sus Transacciones
+        const transaccionGasto = await prisma.transaccionContable.create({
+            data: {
+                categoria: 'GASTO_OPERATIVO',
+                monto: 20.0 + i,
+                descripcion: `Pago de servicio/mantenimiento #${i + 1}`,
+            }
+        });
+
+        await prisma.gastoOperativo.create({
+            data: {
+                concepto: `Mantenimiento equipo ${i + 1}`,
+                monto: 20.0 + i,
+                transaccionId: transaccionGasto.id
+            }
+        });
+    }
+
+    // ==========================================
+    // 7. TABLAS INDEPENDIENTES (Provider, Service)
+    // ==========================================
+    console.log('⚙️ Llenando tablas UUID extra...');
+    for (let i = 0; i < 20; i++) {
+        await prisma.provider.create({
+            data: {
+                name: `External Provider ${i + 1}`,
+                contactName: `Contact ${i + 1}`,
+                phone: `0000-00000${i.toString().padStart(2, '0')}`,
+            }
+        });
+        
+        await prisma.service.create({
+            data: {
+                name: `External Service ${i + 1}`,
+                price: 100.0 + i,
+            }
+        });
+    }
+
+    console.log('✅ ¡Semilla plantada con éxito! Toda la BD tiene exactamente 20 registros relacionados.');
 }
 
 main()
