@@ -1,7 +1,19 @@
 import express from 'express';
-const router = express.Router();
+import ControllerPurchases from './purchases.controller.js';
+import middlewares from './purchases.middleware.js';
+import validationToken from '../../shared/middlewares/validate.token.middleware.js';
+import authorization from '../../shared/middlewares/authorization.middleware.js';
 
-// Ruta temporal para que el servidor no explote
-router.get('/check', (req, res) => res.json({ message: "Módulo activo" }));
+const router = express.Router();
+const controller = new ControllerPurchases();
+
+router.use(validationToken);
+
+router.post(
+    '/', 
+    authorization(['ADMIN']), 
+    middlewares.addPurchaseMiddleware, 
+    controller.addPurchase
+);
 
 export default router;
