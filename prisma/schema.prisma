@@ -29,12 +29,12 @@ enum CategoriaContable {
   GASTO_OPERATIVO
   PAGO_COMISION
   COMPRA_INSUMO
-  OTRO_INGRESO  
-  OTRO_EGRESO    
+  OTRO_INGRESO
+  OTRO_EGRESO
 }
 
 // ==========================================
-// 2. CLIENTES (Dueños y Afiliados)
+// 2. CLIENTES
 // ==========================================
 model Cliente {
   id           Int            @id @default(autoincrement())
@@ -52,43 +52,56 @@ model Cliente {
 }
 
 // ==========================================
-// 3. TIPO_VEHICULOS (Ficha Técnica / ADN)
+// 3. TIPO_VEHICULOS (ADN del Vehículo)
 // ==========================================
 model TipoVehiculo {
-  id        Int      @id @default(autoincrement())
-  placa     String   @unique
+  id        Int        @id @default(autoincrement())
+  placa     String     @unique
   marca     String
   modelo    String
   color     String
-  clase     String   // Ej: Sedan, SUV, Moto
-  activo    Boolean  @default(true) // <-- Soft Delete
+  clase     String     // Ej: Sedan, SUV, Moto
+  activo    Boolean    @default(true)
 
   clienteId Int
-  cliente   Cliente  @relation("Propietario", fields: [clienteId], references: [id])
+  cliente   Cliente    @relation("Propietario", fields: [clienteId], references: [id])
   
   entradas  Vehiculo[]
 
-  createdAt DateTime @default(now()) // <-- Auditoría
-  updatedAt DateTime @updatedAt      // <-- Auditoría
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 // ==========================================
-// 4. VEHICULOS (Operación / Cola de Lavado)
+// 4. VEHICULOS (Registro de Entrada / Check-in)
 // ==========================================
 model Vehiculo {
   id              Int           @id @default(autoincrement())
-  placa           String   @unique // <--- ASEGÚRATE DE QUE ESTO EXISTA
-  marca           String?
-  modelo          String?
   fechaIngreso    DateTime      @default(now())
-  estado          EstadoProceso @default(EN_ESPERA)
-  estadoVisual    String?       
   
   tipoVehiculoId  Int
   adn             TipoVehiculo  @relation(fields: [tipoVehiculoId], references: [id])
   
   conductorId     Int
   conductor       Cliente       @relation("ConductorActivo", fields: [conductorId], references: [id])
+  
+  facturacion     Facturacion?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// ==========================================
+// 5. FACTURACIÓN (Operación y Contabilidad)
+// ==========================================
+model Facturacion {
+  id              Int           @id @default(autoincrement())
+  
+  vehiculoId      Int           @unique
+  vehiculo        Vehiculo      @relation(fields: [vehiculoId], references: [id])
+  
+  estado          EstadoProceso @default(EN_ESPERA)
+  estadoVisual    String?       
   
   lavadorId       Int?
   lavador         Usuario?      @relation("LavadorAsignado", fields: [lavadorId], references: [id])
@@ -99,24 +112,25 @@ model Vehiculo {
   servicios       DetalleServicio[]
   transacciones   TransaccionContable[]
 
-  updatedAt       DateTime      @updatedAt // <-- Para saber cuándo cambió de estado
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 // ==========================================
-// 5. PROVEEDORES, COMPRAS Y GASTOS
+// 6. PROVEEDORES Y COMPRAS
 // ==========================================
 model Proveedor {
-  id        Int      @id @default(autoincrement())
-  rif       String   @unique
+  id        Int       @id @default(autoincrement())
+  rif       String    @unique
   nombre    String
-  telefono  String?  // <-- Contacto
-  email     String?  // <-- Contacto
-  activo    Boolean  @default(true) // <-- Soft Delete
+  telefono  String?
+  email     String?
+  activo    Boolean   @default(true)
 
   compras   Compra[]
   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Compra {
@@ -132,35 +146,24 @@ model Compra {
   updatedAt     DateTime      @updatedAt
 }
 
-model GastoOperativo {
-  id            Int      @id @default(autoincrement())
-  concepto      String   
-  monto         Float
-  fecha         DateTime @default(now())
-  transaccionId Int?     @unique
-  transaccion   TransaccionContable? @relation(fields: [transaccionId], references: [id])
-
-  updatedAt     DateTime @updatedAt
-}
-
 // ==========================================
-// 6. SERVICIOS E INVENTARIO
+// 7. SERVICIOS E INVENTARIO
 // ==========================================
 model Servicio {
-  id               Int     @id @default(autoincrement())
-  nombre           String  @unique
+  id               Int               @id @default(autoincrement())
+  nombre           String            @unique
   precio           Float
   descripcion      String?
   duracionMinutos  Int?
-  esCombo          Boolean @default(false)
-  activo           Boolean @default(true)
-  tipoVehiculo     String  @default("SEDAN")
+  esCombo          Boolean           @default(false)
+  activo           Boolean           @default(true)
+  tipoVehiculo     String            @default("SEDAN")
 
-  detalles     DetalleServicio[]
-  dosificacion ServicioInsumo[]
+  detalles         DetalleServicio[]
+  dosificacion     ServicioInsumo[]
 
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 model Insumo {
@@ -168,32 +171,31 @@ model Insumo {
   nombre       String           @unique
   stockActual  Float
   stockMinimo  Float
-  activo       Boolean          @default(true) // <-- Soft Delete
+  activo       Boolean          @default(true)
 
   servicios    ServicioInsumo[]
   compras      DetalleCompra[]
 
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 }
 
-// Los modelos de relación (Tablas Pivot) usualmente no necesitan auditoría completa
 model DetalleServicio {
-  id         Int      @id @default(autoincrement())
-  vehiculoId Int
-  vehiculo   Vehiculo @relation(fields: [vehiculoId], references: [id])
-  servicioId Int
-  servicio   Servicio @relation(fields: [servicioId], references: [id])
-  precioFijo Float    
+  id             Int          @id @default(autoincrement())
+  facturacionId  Int
+  facturacion    Facturacion  @relation(fields: [facturacionId], references: [id])
+  servicioId     Int
+  servicio       Servicio     @relation(fields: [servicioId], references: [id])
+  precioFijo     Float    
 }
 
 model ServicioInsumo {
-  id         Int      @id @default(autoincrement())
-  servicioId Int
-  servicio   Servicio @relation(fields: [servicioId], references: [id])
-  insumoId   Int
-  insumo     Insumo   @relation(fields: [insumoId], references: [id])
-  cantidad   Float
+  id          Int      @id @default(autoincrement())
+  servicioId  Int
+  servicio    Servicio @relation(fields: [servicioId], references: [id])
+  insumoId    Int
+  insumo      Insumo   @relation(fields: [insumoId], references: [id])
+  cantidad    Float
 }
 
 model DetalleCompra {
@@ -207,38 +209,41 @@ model DetalleCompra {
 }
 
 // ==========================================
-// 7. CONTABILIDAD Y RRHH
+// 8. CONTABILIDAD Y RRHH
 // ==========================================
 model TransaccionContable {
-  id          Int               @id @default(autoincrement())
-  fecha       DateTime          @default(now())
-  categoria   CategoriaContable
-  monto       Float             
-  descripcion String
+  id              Int               @id @default(autoincrement())
+  fecha           DateTime          @default(now())
+  categoria       CategoriaContable
+  monto           Float             
+  descripcion     String
   
-  vehiculoId  Int?
-  vehiculo    Vehiculo?         @relation(fields: [vehiculoId], references: [id])
-  compra      Compra?
-  gasto       GastoOperativo?
+  facturacionId   Int?
+  facturacion     Facturacion?      @relation(fields: [facturacionId], references: [id])
+  
+  compra          Compra?
 
-  // NECESITAS ESTOS DOS CAMPOS PARA QUE TU MODELO NO FALLE
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 model Usuario {
-  id             Int        @id @default(autoincrement())
-  nombre         String
-  username          String     @unique
-  password       String
-  rol            RolUsuario @default(CAJERO)
-  activo         Boolean    @default(true)
-  ordenesLavadas Vehiculo[] @relation("LavadorAsignado")
+  id              Int           @id @default(autoincrement())
+  nombre          String
+  username        String        @unique
+  password        String
+  rol             RolUsuario    @default(CAJERO)
+  activo          Boolean       @default(true)
+  
+  procesosAsignados Facturacion[] @relation("LavadorAsignado")
 
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
+// ==========================================
+// 9. MODELOS AUXILIARES (UUID)
+// ==========================================
 model Provider {
   id          String   @id @default(uuid())
   name        String
