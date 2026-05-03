@@ -4,8 +4,7 @@ class ModelFinance {
     create = async (data) => {
         try {
             return await prisma.transaccionContable.create({
-                data,
-                include: { vehiculo: true, compra: true, gasto: true } // Más limpio y seguro
+                data
             });
         } catch (error) { throw error; }
     }
@@ -13,12 +12,7 @@ class ModelFinance {
     findAll = async () => {
         try {
             return await prisma.transaccionContable.findMany({
-                orderBy: { fecha: 'desc' },
-                include: { 
-                    vehiculo: { select: { placa: true, marca: true, modelo: true } },
-                    compra: { select: { id: true, total: true, proveedor: { select: { nombre: true } } } },
-                    gasto: { select: { id: true, monto: true, concepto: true } }
-                }
+                orderBy: { fecha: 'desc' }
             });
         } catch (error) { throw error; }
     }
@@ -26,12 +20,7 @@ class ModelFinance {
     findById = async (id) => {
         try {
             return await prisma.transaccionContable.findUnique({
-                where: { id },
-                include: { 
-                    vehiculo: { select: { placa: true, marca: true, modelo: true } },
-                    compra: { select: { id: true, total: true, proveedor: { select: { nombre: true } } } },
-                    gasto: { select: { id: true, monto: true, concepto: true } }
-                }
+                where: { id }
             });
         } catch (error) { throw error; }
     }
@@ -112,12 +101,7 @@ class ModelFinance {
 
             return await prisma.transaccionContable.findMany({
                 where,
-                orderBy: { fecha: 'desc' },
-                include: { 
-                    vehiculo: { select: { placa: true, marca: true, modelo: true } },
-                    compra: { select: { id: true, total: true } },
-                    gasto: { select: { id: true, concepto: true } }
-                }
+                orderBy: { fecha: 'desc' }
             });
         } catch (error) { throw error; }
     }

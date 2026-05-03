@@ -11,6 +11,7 @@ router.use(validationToken);
 
 // IMPORTANTE: La ruta de búsqueda específica debe ir antes de las rutas con :id dinámico
 router.get('/search/:cedula', authorization(['ADMIN', 'CAJERO']), controller.getClientByCedula);
+router.get('/reportes/pdf', authorization(['ADMIN', 'CAJERO']), controller.exportarReporteCliente);
 
 router.get('/', authorization(['ADMIN', 'CAJERO']), controller.getClients);
 router.post('/', authorization(['ADMIN', 'CAJERO']), middlewares.addClientMiddleware, controller.addClient);

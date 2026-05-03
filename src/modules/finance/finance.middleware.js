@@ -48,11 +48,13 @@ const validarTransaccion = (req, res, next) => {
     }
 
     // Validar monto
-    if (monto !== undefined && (validators.formatMoneyInvalid(monto.toString()) || monto <= 0)) {
-        errors.push('El monto debe ser un número positivo.');
-    }
-    if (monto && monto > 999999999) {
-        errors.push('El monto no puede ser mayor a 999,999,999.');
+    if (monto !== undefined && monto !== null) {
+        if (validators.formatMoneyInvalid(monto.toString()) || monto <= 0) {
+            errors.push('El monto debe ser un número positivo.');
+        }
+        if (monto > 999999999) {
+            errors.push('El monto no puede ser mayor a 999,999,999.');
+        }
     }
 
     if (errors.length > 0) return response.BadRequest(res, errors);

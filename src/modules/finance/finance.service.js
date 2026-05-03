@@ -112,8 +112,8 @@ class ServiceFinance {
             const resumen = await model.getResumenFinanciero();
 
             return {
-                ingresos: resumen.ingresos.total,
-                egresos: resumen.egresos.total,
+                totalIngresos: resumen.ingresos.total,
+                totalEgresos: resumen.egresos.total,
                 balance: resumen.balance,
                 rentabilidad: resumen.rentabilidad
             };

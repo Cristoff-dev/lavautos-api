@@ -1,5 +1,6 @@
 import response from '../../shared/utils/responses.js';
 import ServiceClients from './clients.service.js';
+import { generarPdfCliente } from '../../services/reportecliente.js';
 
 const service = new ServiceClients();
 
@@ -71,6 +72,19 @@ class ControllerClients {
         } catch (error) {
             if (error.message === 'CLIENT_NOT_FOUND') return response.ItemNotFound(res, "Client not found.");
             if (error.message === 'CLIENT_ALREADY_ACTIVE') return response.ResConflict(res, "Client is already active.");
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    exportarReporteCliente = async (req, res) => {
+        try {
+            const clients = await service.getClients();
+            const pdfBuffer = await generarPdfCliente(clients);
+            
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=reporte_clientes.pdf');
+            res.send(pdfBuffer);
+        } catch (error) {
             return response.ErrorInternal(res, error.message);
         }
     }
