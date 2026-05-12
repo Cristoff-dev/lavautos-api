@@ -240,24 +240,3 @@ model Usuario {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 }
-
-// ==========================================
-// 9. MODELOS AUXILIARES (UUID)
-// ==========================================
-model Provider {
-  id          String   @id @default(uuid())
-  name        String
-  contactName String?
-  phone       String?
-  email       String?
-  address     String?
-  isActive    Boolean  @default(true)
-}
-
-model Service {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Float
-  isActive    Boolean  @default(true)
-}

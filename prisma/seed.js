@@ -25,8 +25,6 @@ async function main() {
     await prisma.proveedor.deleteMany();
     await prisma.cliente.deleteMany();
     await prisma.usuario.deleteMany();
-    await prisma.service.deleteMany();
-    await prisma.provider.deleteMany();
 
     const nombresPersonas = [
         'Keiber', 'Aarón', 'Angel', 'Anthony', 'Hendelber', 
@@ -222,14 +220,6 @@ async function main() {
                 descripcion: `Gasto operativo general ${i+1}`,
             }
         });
-    }
-
-    // ==========================================
-    // 7. TABLAS EXTERNAS / UUID
-    // ==========================================
-    for (let i = 0; i < 20; i++) {
-        await prisma.provider.create({ data: { name: `Ext Provider ${i}` } });
-        await prisma.service.create({ data: { name: `Ext Service ${i}`, price: 50.0 } });
     }
 
     console.log('✅ ¡Semilla plantada con éxito! La base de datos está lista.');
