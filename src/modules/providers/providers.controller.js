@@ -8,10 +8,10 @@ class ControllerProviders {
     crearProveedor = async (req, res) => {
         try {
             const result = await service.addProvider(req.body);
-            return response.QuerySuccess(res, result, "Provider registered successfully.");
+            return response.ItemCreated(res, result);
         } catch (error) {
             if (error.message === 'RIF_ALREADY_EXISTS') {
-                return response.ResConflict(res, "The RIF is already registered.");
+                return response.ResConflict(res, "El RIF ya se encuentra registrado por otro proveedor.");
             }
             return response.ErrorInternal(res, error.message);
         }
@@ -26,13 +26,24 @@ class ControllerProviders {
         }
     }
 
+    obtenerProveedoresDropdown = async (req, res) => {
+        try {
+            const result = await service.getProvidersDropdown();
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
     obtenerProveedor = async (req, res) => {
         try {
             const { id } = req.params;
             const result = await service.getProviderById(parseInt(id));
             return response.QuerySuccess(res, result);
         } catch (error) {
-            if (error.message === 'PROVIDER_NOT_FOUND') return response.ItemNotFound(res, "Provider not found.");
+            if (error.message === 'PROVIDER_NOT_FOUND') {
+                return response.ItemNotFound(res, "Proveedor no encontrado.");
+            }
             return response.ErrorInternal(res, error.message);
         }
     }
@@ -41,9 +52,14 @@ class ControllerProviders {
         try {
             const providerData = { id: parseInt(req.params.id), ...req.body };
             const result = await service.updateProvider(providerData);
-            return response.QuerySuccess(res, result, "Provider updated successfully.");
+            return response.QuerySuccess(res, result, "Proveedor actualizado exitosamente.");
         } catch (error) {
-            if (error.message === 'PROVIDER_NOT_FOUND') return response.ItemNotFound(res, "Provider not found.");
+            if (error.message === 'PROVIDER_NOT_FOUND') {
+                return response.ItemNotFound(res, "Proveedor no encontrado.");
+            }
+            if (error.message === 'RIF_ALREADY_EXISTS') {
+                return response.ResConflict(res, "El RIF ya se encuentra registrado por otro proveedor.");
+            }
             return response.ErrorInternal(res, error.message);
         }
     }
@@ -52,9 +68,43 @@ class ControllerProviders {
         try {
             const { id } = req.params;
             const result = await service.deleteProvider(parseInt(id));
-            return response.QuerySuccess(res, result, "Provider deleted successfully.");
+            return response.QuerySuccess(res, result, "Proveedor desactivado exitosamente.");
         } catch (error) {
-            if (error.message === 'PROVIDER_NOT_FOUND') return response.ItemNotFound(res, "Provider not found.");
+            if (error.message === 'PROVIDER_NOT_FOUND') {
+                return response.ItemNotFound(res, "Proveedor no encontrado.");
+            }
+            if (error.message === 'PROVIDER_ALREADY_INACTIVE') {
+                return response.BadRequest(res, "El proveedor ya está inactivo.");
+            }
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    restaurarProveedor = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const result = await service.restoreProvider(parseInt(id));
+            return response.QuerySuccess(res, result, "Proveedor restaurado exitosamente.");
+        } catch (error) {
+            if (error.message === 'PROVIDER_NOT_FOUND') {
+                return response.ItemNotFound(res, "Proveedor no encontrado.");
+            }
+            if (error.message === 'PROVIDER_ALREADY_ACTIVE') {
+                return response.BadRequest(res, "El proveedor ya está activo.");
+            }
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    obtenerProductosAsignados = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const result = await service.getInsumosAsignados(parseInt(id));
+            return response.QuerySuccess(res, result);
+        } catch (error) {
+            if (error.message === 'PROVIDER_NOT_FOUND') {
+                return response.ItemNotFound(res, "Proveedor no encontrado.");
+            }
             return response.ErrorInternal(res, error.message);
         }
     }
@@ -75,11 +125,15 @@ class ControllerProviders {
     }
 }
 
+const controlador = new ControllerProviders();
 export const {
     crearProveedor,
     obtenerProveedores,
+    obtenerProveedoresDropdown,
     obtenerProveedor,
     actualizarProveedor,
     eliminarProveedor,
+    restaurarProveedor,
+    obtenerProductosAsignados,
     exportarReporteProveedores
-} = new ControllerProviders();
+} = controlador;
