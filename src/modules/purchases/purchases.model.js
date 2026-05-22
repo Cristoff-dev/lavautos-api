@@ -18,6 +18,25 @@ class ModelPurchases {
             return await prisma.proveedor.findUnique({ where: { id } });
         } catch (error) { throw error; }
     }
+
+    getPurchases = async () => {
+        try {
+            return await prisma.compra.findMany({
+                orderBy: {
+                    fecha: 'desc'
+                },
+                include: {
+                    proveedor: true,
+                    detalles: {
+                        include: {
+                            insumo: true
+                        }
+                    },
+                    transaccion: true
+                }
+            });
+        } catch (error) { throw error; }
+    }
 }
 
 export default ModelPurchases;

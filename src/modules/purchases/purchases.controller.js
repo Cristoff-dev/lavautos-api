@@ -8,16 +8,21 @@ class ControllerPurchases {
         try {
             const { purchaseData, details } = req.body;
             const result = await service.registerPurchase(purchaseData, details);
-            
-            return response.QuerySuccess(
-                res, 
-                result, 
-                "Compra registrada con éxito. Inventario y Finanzas actualizados."
-            );
+
+            return response.QuerySuccess(res, result);
         } catch (error) {
             if (error.message === 'PROVIDER_NOT_FOUND') {
                 return response.ItemNotFound(res, "El proveedor indicado no existe.");
             }
+            return response.ErrorInternal(res, error.message);
+        }
+    }
+
+    getPurchases = async (req, res) => {
+        try {
+            const result = await service.getPurchases();
+            return response.QuerySuccess(res, result);
+        } catch (error) {
             return response.ErrorInternal(res, error.message);
         }
     }

@@ -9,10 +9,16 @@ const controller = new ControllerPurchases();
 
 router.use(validationToken);
 
+router.get(
+    '/',
+    authorization(['ADMIN', 'SUPERVISOR', 'CAJERO']),
+    controller.getPurchases
+);
+
 router.post(
-    '/', 
-    authorization(['ADMIN']), 
-    middlewares.addPurchaseMiddleware, 
+    '/',
+    authorization(['ADMIN']),
+    middlewares.addPurchaseMiddleware,
     controller.addPurchase
 );
 
